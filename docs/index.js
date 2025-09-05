@@ -1,13 +1,21 @@
+
 import init, { Ising } from "./pkg/ising_gui_rust.js";
 
 let wasm;
+let ising;
+let n = 100; // default lattice size
+let temp = 2.0;
+let j = 1.0;
+let canvas, ctx, imageData, pixels;
+let animationId;
+
 async function run() {
     wasm = await init();
 
-    const n = 100; // lattice size
-    let temp = 2.0;
-    let j = 1.0;
-    const ising = new Ising(n, temp, j);
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+
+    setupIsing(n);
 
     // Slider for temperature
     const tempSlider = document.getElementById("temp-slider");
@@ -27,36 +35,42 @@ async function run() {
         ising.set_j(j);
     });
 
-    const canvas = document.getElementById("canvas");
-    canvas.width = n;
-    canvas.height = n;
-    // Scale the canvas display 3x larger
-    canvas.style.width = (n * 3) + "px";
-    canvas.style.height = (n * 3) + "px";
-    const ctx = canvas.getContext("2d");
-    const imageData = ctx.createImageData(n, n);
-    const pixels = imageData.data;
-
-    function render() {
-        ising.step();
-
-        const ptr = ising.spins_ptr();
-        const spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
-
-        for (let i = 0; i < spins.length; i++) {
-            const color = spins[i] === 1 ? 255 : 0; // white for +1, black for -1
-            const j = i * 4;
-            pixels[j] = color;
-            pixels[j + 1] = color;
-            pixels[j + 2] = color;
-            pixels[j + 3] = 255; // alpha
-        }
-
-        ctx.putImageData(imageData, 0, 0);
-        requestAnimationFrame(render);
-    }
+    // Dropdown for lattice size
+    const latticeDropdown = document.getElementById("lattice-size");
+    latticeDropdown.addEventListener("change", () => {
+        n = parseInt(latticeDropdown.value);
+        setupIsing(n);
+    });
 
     render();
+}
+
+function setupIsing(size) {
+    ising = new Ising(size, temp, j);
+    canvas.width = size;
+    canvas.height = size;
+    // Scale the canvas display 3x larger
+    canvas.style.width = (size * 3) + "px";
+    canvas.style.height = (size * 3) + "px";
+    ctx = canvas.getContext("2d");
+    imageData = ctx.createImageData(size, size);
+    pixels = imageData.data;
+}
+
+function render() {
+    ising.step();
+    const ptr = ising.spins_ptr();
+    const spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
+    for (let i = 0; i < spins.length; i++) {
+        const color = spins[i] === 1 ? 255 : 0;
+        const j = i * 4;
+        pixels[j] = color;
+        pixels[j + 1] = color;
+        pixels[j + 2] = color;
+        pixels[j + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    animationId = requestAnimationFrame(render);
 }
 
 run();

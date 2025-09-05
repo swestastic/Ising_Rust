@@ -14,6 +14,14 @@
   <input type="range" id="temp-slider" min="0.1" max="5.0" step="0.01" value="2.0" style="width: 300px; margin-bottom: 16px;">
   <label for="j-slider" style="color: white; margin-bottom: 8px;">Coupling J: <span id="j-value">1.0</span></label>
   <input type="range" id="j-slider" min="-2.0" max="2.0" step="0.01" value="1.0" style="width: 300px; margin-bottom: 16px;">
+      <label for="lattice-size" style="color: white; margin-bottom: 8px;">Lattice Size:
+        <select id="lattice-size" style="margin-left: 8px;">
+          <option value="50">50x50</option>
+          <option value="100" selected>100x100</option>
+          <option value="200">200x200</option>
+          <option value="300">300x300</option>
+        </select>
+      </label>
       <canvas id="canvas"></canvas>
     </div>
     <script type="module" src="./index.js"></script>
