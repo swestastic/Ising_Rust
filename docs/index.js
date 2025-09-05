@@ -40,6 +40,10 @@ async function run() {
     latticeDropdown.addEventListener("change", () => {
         n = parseInt(latticeDropdown.value);
         setupIsing(n);
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+        render();
     });
 
     render();
