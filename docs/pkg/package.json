@@ -1,0 +1,15 @@
+{
+  "name": "ising_gui_rust",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "ising_gui_rust_bg.wasm",
+    "ising_gui_rust.js",
+    "ising_gui_rust.d.ts"
+  ],
+  "main": "ising_gui_rust.js",
+  "types": "ising_gui_rust.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
