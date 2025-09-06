@@ -53,9 +53,9 @@ function setupIsing(size) {
     ising = new Ising(size, temp, j);
     canvas.width = size;
     canvas.height = size;
-    // Scale the canvas display 3x larger
-    canvas.style.width = (size * 3) + "px";
-    canvas.style.height = (size * 3) + "px";
+    // Keep the canvas display size constant
+    canvas.style.width = "400px";
+    canvas.style.height = "400px";
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(size, size);
     pixels = imageData.data;
