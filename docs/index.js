@@ -22,7 +22,18 @@ async function run() {
     const tempValue = document.getElementById("temp-value");
     tempSlider.addEventListener("input", () => {
         temp = parseFloat(tempSlider.value);
-        tempValue.textContent = temp.toFixed(2);
+        tempValue.value = temp.toFixed(2);
+        ising.set_temp(temp);
+    });
+
+    tempValue.addEventListener("change", () => {
+        let val = parseFloat(tempValue.value);
+        if (isNaN(val) || val < 0.1 || val > 5.0) {
+            tempValue.value = temp.toFixed(2);
+            return;
+        }
+        temp = val;
+        tempSlider.value = temp;
         ising.set_temp(temp);
     });
 
@@ -31,7 +42,18 @@ async function run() {
     const jValue = document.getElementById("j-value");
     jSlider.addEventListener("input", () => {
         j = parseFloat(jSlider.value);
-        jValue.textContent = j.toFixed(2);
+        jValue.value = j.toFixed(2);
+        ising.set_j(j);
+    });
+
+    jValue.addEventListener("change", () => {
+        let val = parseFloat(jValue.value);
+        if (isNaN(val) || val < -2.0 || val > 2.0) {
+            jValue.value = j.toFixed(2);
+            return;
+        }
+        j = val;
+        jSlider.value = j;
         ising.set_j(j);
     });
 
