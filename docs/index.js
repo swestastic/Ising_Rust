@@ -107,6 +107,20 @@ async function run() {
     });
     skipValue.textContent = sweepsPerFrame;
 
+    // Reset button logic
+    const resetBtn = document.getElementById("reset-btn");
+    resetBtn.addEventListener("click", () => {
+        setupIsing(n);
+        plotHistory = [];
+        lastTime = performance.now();
+        lastSweepCount = 0;
+        render.sweepCount = 0;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+        render();
+    });
+
     render();
 }
 
