@@ -145,8 +145,10 @@ function render() {
     for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
         if (algorithm === "metropolis") {
             ising.step();
-        } else {
+        } else if (algorithm === "wolff") {
             ising.wolff_step();
+        } else if (algorithm === "swendsen-wang") {
+            ising.swendsen_wang_step();
         }
     }
 

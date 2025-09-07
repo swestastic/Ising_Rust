@@ -1,6 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const ising_swendsen_wang_step: (a: number) => void;
 export const ising_avg_energy: (a: number) => number;
 export const __wbg_ising_free: (a: number, b: number) => void;
 export const ising_new: (a: number, b: number, c: number) => number;

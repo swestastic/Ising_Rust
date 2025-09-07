@@ -4,6 +4,77 @@
 impl Ising {
     // ...existing code...
 
+    /// Perform a single Swendsen-Wang cluster update
+    #[wasm_bindgen]
+    pub fn swendsen_wang_step(&mut self) {
+    // VecDeque not needed here
+        let n = self.n;
+        let mut rng = StdRng::from_entropy();
+        let p_bond = 1.0 - (-2.0 * self.j / self.temp).exp();
+        // Step 1: Build bond map
+        let mut bonds = vec![false; n * n * 4]; // 4 neighbors per site
+        for i in 0..n {
+            for j in 0..n {
+                let idx = i * n + j;
+                let s = self.spins[idx];
+                let neighbors = [
+                    ((i + 1) % n, j),
+                    (i, (j + 1) % n),
+                ];
+                for (k, (ni, nj)) in neighbors.iter().enumerate() {
+                    let nidx = ni * n + nj;
+                    if self.spins[nidx] == s && rng.gen_range(0.0..1.0) < p_bond {
+                        bonds[idx * 4 + k] = true;
+                    }
+                }
+            }
+        }
+        // Step 2: Cluster labeling (Union-Find)
+        let mut labels = (0..n * n).collect::<Vec<_>>();
+        fn find(labels: &mut [usize], x: usize) -> usize {
+            if labels[x] != x {
+                labels[x] = find(labels, labels[x]);
+            }
+            labels[x]
+        }
+        fn union(labels: &mut [usize], x: usize, y: usize) {
+            let xroot = find(labels, x);
+            let yroot = find(labels, y);
+            if xroot != yroot {
+                labels[yroot] = xroot;
+            }
+        }
+        for i in 0..n {
+            for j in 0..n {
+                let idx = i * n + j;
+                // Right neighbor
+                if bonds[idx * 4 + 1] {
+                    let nidx = i * n + (j + 1) % n;
+                    union(&mut labels, idx, nidx);
+                }
+                // Down neighbor
+                if bonds[idx * 4 + 0] {
+                    let nidx = ((i + 1) % n) * n + j;
+                    union(&mut labels, idx, nidx);
+                }
+            }
+        }
+        // Step 3: Flip clusters
+        let mut cluster_flips = vec![None; n * n];
+        for i in 0..n {
+            for j in 0..n {
+                let idx = i * n + j;
+                let root = find(&mut labels, idx);
+                if cluster_flips[root].is_none() {
+                    cluster_flips[root] = Some(if rng.gen_range(0.0..1.0) < 0.5 { -1 } else { 1 });
+                }
+                self.spins[idx] = self.spins[idx] * cluster_flips[root].unwrap();
+            }
+        }
+        self.attempted += 1;
+        self.accepted += 1;
+    }
+
     /// Compute the average energy per site
     #[wasm_bindgen]
     pub fn avg_energy(&self) -> f64 {

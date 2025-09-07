@@ -3,6 +3,10 @@
 export class Ising {
   free(): void;
   /**
+   * Perform a single Swendsen-Wang cluster update
+   */
+  swendsen_wang_step(): void;
+  /**
    * Compute the average energy per site
    */
   avg_energy(): number;
@@ -38,6 +42,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly ising_swendsen_wang_step: (a: number) => void;
   readonly ising_avg_energy: (a: number) => number;
   readonly __wbg_ising_free: (a: number, b: number) => void;
   readonly ising_new: (a: number, b: number, c: number) => number;

@@ -67,6 +67,12 @@ export class Ising {
         wasm.__wbg_ising_free(ptr, 0);
     }
     /**
+     * Perform a single Swendsen-Wang cluster update
+     */
+    swendsen_wang_step() {
+        wasm.ising_swendsen_wang_step(this.__wbg_ptr);
+    }
+    /**
      * Compute the average energy per site
      * @returns {number}
      */
