@@ -67,6 +67,14 @@ export class Ising {
         wasm.__wbg_ising_free(ptr, 0);
     }
     /**
+     * Compute the average energy per site
+     * @returns {number}
+     */
+    avg_energy() {
+        const ret = wasm.ising_avg_energy(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * @param {number} n
      * @param {number} temp
      * @param {number} j
@@ -79,6 +87,20 @@ export class Ising {
     }
     step() {
         wasm.ising_step(this.__wbg_ptr);
+    }
+    /**
+     * Perform a single Wolff cluster update
+     */
+    wolff_step() {
+        wasm.ising_wolff_step(this.__wbg_ptr);
+    }
+    /**
+     * Get acceptance ratio
+     * @returns {number}
+     */
+    acceptance_ratio() {
+        const ret = wasm.ising_acceptance_ratio(this.__wbg_ptr);
+        return ret;
     }
     /**
      * Set coupling constant J from JS

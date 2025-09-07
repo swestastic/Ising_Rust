@@ -2,8 +2,20 @@
 /* eslint-disable */
 export class Ising {
   free(): void;
+  /**
+   * Compute the average energy per site
+   */
+  avg_energy(): number;
   constructor(n: number, temp: number, j: number);
   step(): void;
+  /**
+   * Perform a single Wolff cluster update
+   */
+  wolff_step(): void;
+  /**
+   * Get acceptance ratio
+   */
+  acceptance_ratio(): number;
   /**
    * Set coupling constant J from JS
    */
@@ -26,9 +38,12 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly ising_avg_energy: (a: number) => number;
   readonly __wbg_ising_free: (a: number, b: number) => void;
   readonly ising_new: (a: number, b: number, c: number) => number;
   readonly ising_step: (a: number) => void;
+  readonly ising_wolff_step: (a: number) => void;
+  readonly ising_acceptance_ratio: (a: number) => number;
   readonly ising_set_j: (a: number, b: number) => void;
   readonly ising_spins_ptr: (a: number) => number;
   readonly ising_size: (a: number) => number;

@@ -1,3 +1,32 @@
+// ...existing code...
+
+#[wasm_bindgen]
+impl Ising {
+    // ...existing code...
+
+    /// Compute the average energy per site
+    #[wasm_bindgen]
+    pub fn avg_energy(&self) -> f64 {
+        let n = self.n;
+        let mut energy = 0.0;
+        for i in 0..n {
+            for j in 0..n {
+                let idx = i * n + j;
+                let s = self.spins[idx] as f64;
+                let neighbors = [
+                    ((i + 1) % n, j),
+                    (i, (j + 1) % n),
+                ];
+                for (ni, nj) in neighbors {
+                    let nidx = ni * n + nj;
+                    energy -= self.j * s * self.spins[nidx] as f64;
+                }
+            }
+        }
+        energy / (n * n) as f64
+    }
+    // ...existing code...
+}
 use wasm_bindgen::prelude::*;
 use rand::Rng;
 use rand::SeedableRng;
@@ -9,6 +38,8 @@ pub struct Ising {
     spins: Vec<i8>,
     temp: f64,
     j: f64,
+    accepted: usize,
+    attempted: usize,
 }
 
 #[wasm_bindgen]
@@ -19,11 +50,13 @@ impl Ising {
         let spins = (0..n * n)
             .map(|_| if rng.gen_range(0.0..1.0) > 0.5 { 1 } else { -1 })
             .collect();
-        Self { n, spins, temp, j }
+        Self { n, spins, temp, j, accepted: 0, attempted: 0 }
     }
 
     pub fn step(&mut self) {
         let mut rng = StdRng::from_entropy();
+        self.attempted += self.n * self.n;
+        let mut accepted = 0;
         for _ in 0..self.n * self.n {
             let i = rng.gen_range(0..self.n);
             let j = rng.gen_range(0..self.n);
@@ -46,7 +79,60 @@ impl Ising {
             let d_e = 2.0 * self.j * s as f64 * sum as f64;
             if d_e <= 0.0 || rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
                 self.spins[idx] = -s;
+                accepted += 1;
             }
+        }
+        self.accepted += accepted;
+    }
+
+    /// Perform a single Wolff cluster update
+    #[wasm_bindgen]
+    pub fn wolff_step(&mut self) {
+        use std::collections::VecDeque;
+        let mut rng = StdRng::from_entropy();
+        let n = self.n;
+        let p_add = 1.0 - (-2.0 * self.j / self.temp).exp();
+
+        // Pick a random seed site
+        let i0 = rng.gen_range(0..n);
+        let j0 = rng.gen_range(0..n);
+        let seed_spin = self.spins[i0 * n + j0];
+
+        let mut visited = vec![false; n * n];
+        let mut queue = VecDeque::new();
+        queue.push_back((i0, j0));
+        visited[i0 * n + j0] = true;
+    let mut _cluster_size = 0;
+
+        while let Some((i, j)) = queue.pop_front() {
+            self.spins[i * n + j] *= -1;
+            _cluster_size += 1;
+            let neighbors = [
+                ((i + 1) % n, j),
+                ((i + n - 1) % n, j),
+                (i, (j + 1) % n),
+                (i, (j + n - 1) % n),
+            ];
+            for (ni, nj) in neighbors {
+                let idx = ni * n + nj;
+                if !visited[idx] && self.spins[idx] == seed_spin {
+                    if rng.gen_range(0.0..1.0) < p_add {
+                        visited[idx] = true;
+                        queue.push_back((ni, nj));
+                    }
+                }
+            }
+        }
+        self.attempted += 1;
+        self.accepted += 1;
+    }
+    /// Get acceptance ratio
+    #[wasm_bindgen]
+    pub fn acceptance_ratio(&self) -> f64 {
+        if self.attempted == 0 {
+            0.0
+        } else {
+            self.accepted as f64 / self.attempted as f64
         }
     }
     /// Set coupling constant J from JS
