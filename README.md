@@ -37,6 +37,8 @@ Simply run `python3 Ising_GUI.py` to open a Tkinter window and run the simulatio
 
 - Add external magnetic field support for Swendsen-Wang and Wolff algorithms using ghost spin technique
 
+- Fix Wolff algorithm J<0 behavior
+
 ## Acknowledgements
 
 This work was inspired by [mattbierbaum's ising.js](https://github.com/mattbierbaum/ising.js/). When I was first learning about the Ising model, I thought that it was a very helpful tool for visualizing the behavior of the model. I wanted to take my own attempt at it because of that!
