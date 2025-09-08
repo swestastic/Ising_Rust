@@ -29,19 +29,14 @@ To run locally on your machine:
 - Then run `python3 -m http.server 8000` to create a local server for it (Other methods are okay as well, such as using Node.js).
 - Navigate to `http://localhost:8000/docs/` to view the webpage locally.
 
+If you are making edits to the code and need to recompile the webapp (This is necessary any time you make edits to `lib.rs`):
+
+- Open your terminal in the folder `ising_gui_rust`
+- Run `wasm-pack build --target web --out-dir ../docs/pkg`
+
 ## Future Work
 
-- Add external magnetic field support
-
-- Add other methods and interpretations from Ising_GUI, such as Wolff, Swendsen-Wang, Kawasaki, and Glauber
-
-- Add live plotting
-
-- Add the ability to save data from simulation runs
-
-- Add external magnetic field support for Swendsen-Wang and Wolff algorithms using ghost spin technique
-
-- Fix Wolff algorithm J<0 behavior
+- There is a lot of work left to do on this project. There is currently a TODO list open on the deployed site.
 
 ## Acknowledgements
 
