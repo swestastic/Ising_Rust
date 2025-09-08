@@ -37,7 +37,10 @@
         <select id="algorithm" style="margin-left: 8px;">
           <option value="metropolis" selected>Metropolis</option>
           <option value="wolff">Wolff</option>
-          <option value="swendsen-wang">Swendsen-Wang</option>
+          <!-- <option value="swendsen-wang">Swendsen-Wang (BROKEN) </option> -->
+          <!-- <option value="heat-bath">Heat Bath (BROKEN) </option> -->
+          <option value="glauber">Glauber</option>
+          <!-- <option value="kawasaki">Kawasaki (BROKEN)</option> -->
         </select>
       </label>
   <label for="skip-slider" style="color: white; margin-bottom: 8px;">Sweeps per frame: <span id="skip-value">1</span></label>
@@ -64,4 +67,40 @@
     </div>
     <script type="module" src="./index.js"></script>
   </body>
+  <div style="color: white; position: absolute; top: 16px; left: 16px; background: rgba(34,34,34,0.9); padding: 16px; border-radius: 8px;">
+    <h3 style="margin-top: 0; margin-bottom: 8px;">TODO List</h3>
+    <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
+      <li>Implement Swendsen-Wang algorithm</li>
+      <li>Implement Heat Bath algorithm</li>
+      <li>Implement Kawasaki dynamics</li>
+      <li>J<0 functionality for wolff and swendsen-wang</li>
+      <li>Add export/save functionality for plots and data</li>
+      <li>Documentation/information about algorithms</li>
+      <li>Improve UI/UX design</li>
+      <li>Optimize performance for larger lattices</li>
+      <li>Add more plot options (e.g. specific heat, susceptibility, acceptance ratio)</li>
+      <li>Ensure physics are correct for all models</li>
+      <li>Code cleanup and comments</li>
+      <li>Live readout for average cluster size</li>
+      <li>Fix greyscale image output for cluster algorithms</li>
+      <li>Better axes and higher resolution for plots</li>
+      <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
+      <li>Add none option to suppress graph output</li>
+
+    </ul>
+  </div>
+  <div style="color: white; position: absolute; top: 350px; left: 16px; background: rgba(34,34,34,0.9); padding: 16px; border-radius: 8px;">
+    <h3 style="margin-top: 0; margin-bottom: 8px;">Currently Working</h3>
+    <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
+      <li>All aspects of Metropolis algorithm</li>
+      <li>All aspects of Wolff algorithm (h!=0 is slow)</li>
+      <li>All aspects of Glauber dynamics</li>
+      <li>Live image updates</li>
+      <li>Live plot updates</li>
+      <li>Plot selection dropdown</li>
+      <li>Instantaneous E and M values</li>
+      <li>Sweeps/second value</li>
+      <li>Reset button</li>
+    </ul>
+  </div>
 </html>

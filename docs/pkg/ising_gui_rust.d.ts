@@ -2,62 +2,35 @@
 /* eslint-disable */
 export class Ising {
   free(): void;
-  /**
-   * Perform a single Swendsen-Wang cluster update
-   */
-  swendsen_wang_step(): void;
-  /**
-   * Compute the average energy per site
-   */
-  avg_energy(): number;
   constructor(n: number, temp: number, j: number);
-  step(): void;
-  /**
-   * Set external field h from JS
-   */
-  set_h(h: number): void;
-  /**
-   * Perform a single Wolff cluster update
-   */
+  metropolis_step(): void;
+  glauber_step(): void;
   wolff_step(): void;
-  /**
-   * Get acceptance ratio
-   */
+  set_h(h: number): void;
   acceptance_ratio(): number;
-  /**
-   * Set coupling constant J from JS
-   */
-  set_j(j: number): void;
-  /**
-   * Expose pointer to spins for JS
-   */
+  avg_energy(): number;
   spins_ptr(): number;
-  /**
-   * Expose size of the lattice for JS
-   */
   size(): number;
-  /**
-   * Set temperature from JS
-   */
   set_temp(temp: number): void;
+  set_j(j: number): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly ising_swendsen_wang_step: (a: number) => void;
-  readonly ising_avg_energy: (a: number) => number;
   readonly __wbg_ising_free: (a: number, b: number) => void;
   readonly ising_new: (a: number, b: number, c: number) => number;
-  readonly ising_step: (a: number) => void;
-  readonly ising_set_h: (a: number, b: number) => void;
+  readonly ising_metropolis_step: (a: number) => void;
+  readonly ising_glauber_step: (a: number) => void;
   readonly ising_wolff_step: (a: number) => void;
+  readonly ising_set_h: (a: number, b: number) => void;
   readonly ising_acceptance_ratio: (a: number) => number;
-  readonly ising_set_j: (a: number, b: number) => void;
+  readonly ising_avg_energy: (a: number) => number;
   readonly ising_spins_ptr: (a: number) => number;
   readonly ising_size: (a: number) => number;
   readonly ising_set_temp: (a: number, b: number) => void;
+  readonly ising_set_j: (a: number, b: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

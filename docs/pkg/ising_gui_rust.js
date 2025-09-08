@@ -67,20 +67,6 @@ export class Ising {
         wasm.__wbg_ising_free(ptr, 0);
     }
     /**
-     * Perform a single Swendsen-Wang cluster update
-     */
-    swendsen_wang_step() {
-        wasm.ising_swendsen_wang_step(this.__wbg_ptr);
-    }
-    /**
-     * Compute the average energy per site
-     * @returns {number}
-     */
-    avg_energy() {
-        const ret = wasm.ising_avg_energy(this.__wbg_ptr);
-        return ret;
-    }
-    /**
      * @param {number} n
      * @param {number} temp
      * @param {number} j
@@ -91,24 +77,22 @@ export class Ising {
         IsingFinalization.register(this, this.__wbg_ptr, this);
         return this;
     }
-    step() {
-        wasm.ising_step(this.__wbg_ptr);
+    metropolis_step() {
+        wasm.ising_metropolis_step(this.__wbg_ptr);
+    }
+    glauber_step() {
+        wasm.ising_glauber_step(this.__wbg_ptr);
+    }
+    wolff_step() {
+        wasm.ising_wolff_step(this.__wbg_ptr);
     }
     /**
-     * Set external field h from JS
      * @param {number} h
      */
     set_h(h) {
         wasm.ising_set_h(this.__wbg_ptr, h);
     }
     /**
-     * Perform a single Wolff cluster update
-     */
-    wolff_step() {
-        wasm.ising_wolff_step(this.__wbg_ptr);
-    }
-    /**
-     * Get acceptance ratio
      * @returns {number}
      */
     acceptance_ratio() {
@@ -116,14 +100,13 @@ export class Ising {
         return ret;
     }
     /**
-     * Set coupling constant J from JS
-     * @param {number} j
+     * @returns {number}
      */
-    set_j(j) {
-        wasm.ising_set_j(this.__wbg_ptr, j);
+    avg_energy() {
+        const ret = wasm.ising_avg_energy(this.__wbg_ptr);
+        return ret;
     }
     /**
-     * Expose pointer to spins for JS
      * @returns {number}
      */
     spins_ptr() {
@@ -131,7 +114,6 @@ export class Ising {
         return ret >>> 0;
     }
     /**
-     * Expose size of the lattice for JS
      * @returns {number}
      */
     size() {
@@ -139,11 +121,16 @@ export class Ising {
         return ret >>> 0;
     }
     /**
-     * Set temperature from JS
      * @param {number} temp
      */
     set_temp(temp) {
         wasm.ising_set_temp(this.__wbg_ptr, temp);
+    }
+    /**
+     * @param {number} j
+     */
+    set_j(j) {
+        wasm.ising_set_j(this.__wbg_ptr, j);
     }
 }
 

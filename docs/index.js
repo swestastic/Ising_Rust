@@ -164,11 +164,17 @@ function render() {
     energyPlotCtx.setTransform(1, 0, 0, 1, 0, 0);
     for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
         if (algorithm === "metropolis") {
-            ising.step();
+            ising.metropolis_step();
         } else if (algorithm === "wolff") {
             ising.wolff_step();
         } else if (algorithm === "swendsen-wang") {
             ising.swendsen_wang_step();
+        } else if (algorithm === "heat-bath") {
+            ising.heat_bath_step();
+        } else if (algorithm === "glauber") {
+            ising.glauber_step();
+        } else if (algorithm === "kawasaki") {
+            ising.kawasaki_step();
         }
     }
 
