@@ -180,11 +180,19 @@ impl Ising {
         let mut queue = VecDeque::new();
         queue.push_back((i0, j0));
         visited[i0 * n + j0] = true;
-    let mut _cluster_size = 0;
+        let mut cluster_sites = vec![(i0, j0)];
+
+        // Track if cluster is connected to ghost spin
+        let mut connected_to_ghost = false;
 
         while let Some((i, j)) = queue.pop_front() {
-            self.spins[i * n + j] *= -1;
-            _cluster_size += 1;
+            // For each site, check connection to ghost spin
+            let idx = i * n + j;
+            let s = self.spins[idx];
+            let p_ext = 1.0 - (-2.0 * self.h * s as f64 / self.temp).exp();
+            if !connected_to_ghost && rng.gen_range(0.0..1.0) < p_ext {
+                connected_to_ghost = true;
+            }
             let neighbors = [
                 ((i + 1) % n, j),
                 ((i + n - 1) % n, j),
@@ -192,14 +200,21 @@ impl Ising {
                 (i, (j + n - 1) % n),
             ];
             for (ni, nj) in neighbors {
-                let idx = ni * n + nj;
-                if !visited[idx] && self.spins[idx] == seed_spin {
+                let nidx = ni * n + nj;
+                if !visited[nidx] && self.spins[nidx] == seed_spin {
                     if rng.gen_range(0.0..1.0) < p_add {
-                        visited[idx] = true;
+                        visited[nidx] = true;
                         queue.push_back((ni, nj));
+                        cluster_sites.push((ni, nj));
                     }
                 }
             }
+        }
+
+        // Flip cluster if not connected to ghost spin
+        let flip = if connected_to_ghost { 1 } else { -1 };
+        for &(i, j) in &cluster_sites {
+            self.spins[i * n + j] *= flip;
         }
         self.attempted += 1;
         self.accepted += 1;
