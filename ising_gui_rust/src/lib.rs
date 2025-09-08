@@ -109,6 +109,7 @@ pub struct Ising {
     spins: Vec<i8>,
     temp: f64,
     j: f64,
+    h: f64,
     accepted: usize,
     attempted: usize,
 }
@@ -121,7 +122,7 @@ impl Ising {
         let spins = (0..n * n)
             .map(|_| if rng.gen_range(0.0..1.0) > 0.5 { 1 } else { -1 })
             .collect();
-        Self { n, spins, temp, j, accepted: 0, attempted: 0 }
+        Self { n, spins, temp, j, h: 0.0, accepted: 0, attempted: 0 }
     }
 
     pub fn step(&mut self) {
@@ -147,13 +148,19 @@ impl Ising {
                 sum += self.spins[ni * self.n + nj];
             }
 
-            let d_e = 2.0 * self.j * s as f64 * sum as f64;
+            let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
             if d_e <= 0.0 || rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
                 self.spins[idx] = -s;
                 accepted += 1;
             }
         }
         self.accepted += accepted;
+    }
+
+    /// Set external field h from JS
+    #[wasm_bindgen]
+    pub fn set_h(&mut self, h: f64) {
+        self.h = h;
     }
 
     /// Perform a single Wolff cluster update

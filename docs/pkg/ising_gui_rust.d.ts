@@ -13,6 +13,10 @@ export class Ising {
   constructor(n: number, temp: number, j: number);
   step(): void;
   /**
+   * Set external field h from JS
+   */
+  set_h(h: number): void;
+  /**
    * Perform a single Wolff cluster update
    */
   wolff_step(): void;
@@ -47,6 +51,7 @@ export interface InitOutput {
   readonly __wbg_ising_free: (a: number, b: number) => void;
   readonly ising_new: (a: number, b: number, c: number) => number;
   readonly ising_step: (a: number) => void;
+  readonly ising_set_h: (a: number, b: number) => void;
   readonly ising_wolff_step: (a: number) => void;
   readonly ising_acceptance_ratio: (a: number) => number;
   readonly ising_set_j: (a: number, b: number) => void;

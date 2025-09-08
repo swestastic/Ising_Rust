@@ -95,6 +95,13 @@ export class Ising {
         wasm.ising_step(this.__wbg_ptr);
     }
     /**
+     * Set external field h from JS
+     * @param {number} h
+     */
+    set_h(h) {
+        wasm.ising_set_h(this.__wbg_ptr, h);
+    }
+    /**
      * Perform a single Wolff cluster update
      */
     wolff_step() {

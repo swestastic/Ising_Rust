@@ -6,6 +6,7 @@ export const ising_avg_energy: (a: number) => number;
 export const __wbg_ising_free: (a: number, b: number) => void;
 export const ising_new: (a: number, b: number, c: number) => number;
 export const ising_step: (a: number) => void;
+export const ising_set_h: (a: number, b: number) => void;
 export const ising_wolff_step: (a: number) => void;
 export const ising_acceptance_ratio: (a: number) => number;
 export const ising_set_j: (a: number, b: number) => void;

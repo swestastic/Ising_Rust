@@ -6,6 +6,7 @@ let ising;
 let n = 100; // default lattice size
 let temp = 2.0;
 let j = 1.0;
+let h = 0.0;
 let canvas, ctx, imageData, pixels;
 let animationId;
 let algorithm = "metropolis";
@@ -16,6 +17,24 @@ const maxHistory = 400;
 let plotType = "energy";
 
 async function run() {
+    // Slider for external field h
+    const hSlider = document.getElementById("h-slider");
+    const hValue = document.getElementById("h-value");
+    hSlider.addEventListener("input", () => {
+        h = parseFloat(hSlider.value);
+        hValue.value = h.toFixed(2);
+        ising.set_h(h);
+    });
+    hValue.addEventListener("change", () => {
+        let val = parseFloat(hValue.value);
+        if (isNaN(val) || val < -2.0 || val > 2.0) {
+            hValue.value = h.toFixed(2);
+            return;
+        }
+        h = val;
+        hSlider.value = h;
+        ising.set_h(h);
+    });
     wasm = await init();
 
     canvas = document.getElementById("canvas");
@@ -126,6 +145,7 @@ async function run() {
 
 function setupIsing(size) {
     ising = new Ising(size, temp, j);
+    ising.set_h(h);
     canvas.width = size;
     canvas.height = size;
     // Keep the canvas display size constant
