@@ -59,14 +59,25 @@ impl Ising {
                 }
             }
         }
-        // Step 3: Flip clusters
+        // Step 3: Ghost spin technique for external field
+        // For each cluster, check if it connects to ghost spin
+        let mut cluster_connected_to_ghost = vec![false; n * n];
+        for idx in 0..n * n {
+            let root = find(&mut labels, idx);
+            let s = self.spins[idx];
+            let p_ext = 1.0 - (-2.0 * self.h * s as f64 / self.temp).exp();
+            if !cluster_connected_to_ghost[root] && rng.gen_range(0.0..1.0) < p_ext {
+                cluster_connected_to_ghost[root] = true;
+            }
+        }
+        // Step 4: Flip clusters if not connected to ghost spin
         let mut cluster_flips = vec![None; n * n];
         for i in 0..n {
             for j in 0..n {
                 let idx = i * n + j;
                 let root = find(&mut labels, idx);
                 if cluster_flips[root].is_none() {
-                    cluster_flips[root] = Some(if rng.gen_range(0.0..1.0) < 0.5 { -1 } else { 1 });
+                    cluster_flips[root] = Some(if cluster_connected_to_ghost[root] { 1 } else { -1 });
                 }
                 self.spins[idx] = self.spins[idx] * cluster_flips[root].unwrap();
             }
