@@ -218,22 +218,19 @@ impl Ising {
     #[wasm_bindgen]
     pub fn avg_energy(&self) -> f64 {
         let n = self.n;
-        let mut energy = 0.0;
+        let mut e = 0.0;
         for i in 0..n {
             for j in 0..n {
                 let idx = i * n + j;
                 let s = self.spins[idx] as f64;
-                let neighbors = [
-                    ((i + 1) % n, j),
-                    (i, (j + 1) % n),
-                ];
-                for (ni, nj) in neighbors {
-                    let nidx = ni * n + nj;
-                    energy -= self.j * s * self.spins[nidx] as f64;
-                }
+                // bonds right and down to avoid double count
+                e -= self.j * s * self.spins[((i + 1) % n) * n + j] as f64;
+                e -= self.j * s * self.spins[i * n + ((j + 1) % n)] as f64;
+                // field term
+                e -= self.h * s;
             }
         }
-        energy / (n * n) as f64
+        e / (n * n) as f64
     }
 
 
