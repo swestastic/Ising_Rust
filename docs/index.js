@@ -209,83 +209,84 @@ function render() {
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
     acceptanceRatioValue.textContent = ising.acceptance_ratio().toFixed(4);
-
-    // Plot selected value
     let value = plotType === "energy" ? energy : magnetization;
-    plotHistory.push(value);
-    if (plotHistory.length > maxHistory) plotHistory.shift();
+    if (plotType !== "none") {
+        // Plot selected value
+        plotHistory.push(value);
+        if (plotHistory.length > maxHistory) plotHistory.shift();
 
-    // Draw plot with axes and labels
-    energyPlotCtx.clearRect(0, 0, energyPlot.width, energyPlot.height);
-    // Axes
-    energyPlotCtx.strokeStyle = "#aaa";
-    energyPlotCtx.lineWidth = 1;
-    energyPlotCtx.beginPath();
-    // Y axis
-    energyPlotCtx.moveTo(40, 10);
-    energyPlotCtx.lineTo(40, energyPlot.height - 20);
-    // X axis
-    energyPlotCtx.moveTo(40, energyPlot.height - 20);
-    energyPlotCtx.lineTo(energyPlot.width - 10, energyPlot.height - 20);
-    energyPlotCtx.stroke();
+        // Draw plot with axes and labels
+        energyPlotCtx.clearRect(0, 0, energyPlot.width, energyPlot.height);
+        // Axes
+        energyPlotCtx.strokeStyle = "#aaa";
+        energyPlotCtx.lineWidth = 1;
+        energyPlotCtx.beginPath();
+        // Y axis
+        energyPlotCtx.moveTo(40, 10);
+        energyPlotCtx.lineTo(40, energyPlot.height - 20);
+        // X axis
+        energyPlotCtx.moveTo(40, energyPlot.height - 20);
+        energyPlotCtx.lineTo(energyPlot.width - 10, energyPlot.height - 20);
+        energyPlotCtx.stroke();
 
-    // Y labels
-    energyPlotCtx.save();
-    energyPlotCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
-    energyPlotCtx.fillStyle = "#fff";
-    energyPlotCtx.font = "12px Arial";
-    energyPlotCtx.textAlign = "right";
-    if (plotType === "energy") {
-        const ymin = -2 * Math.abs(j);
-        const ymax = 2 * Math.abs(j);
-        energyPlotCtx.fillText(ymin.toFixed(2), 35, energyPlot.height - 20);
-        energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
-        energyPlotCtx.fillText(ymax.toFixed(2), 35, 20);
-    } else {
-        energyPlotCtx.fillText("-1", 35, energyPlot.height - 20);
-        energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
-        energyPlotCtx.fillText("1", 35, 20);
-    }
-    // X label
-    energyPlotCtx.textAlign = "center";
-    energyPlotCtx.font = "14px Arial";
-    energyPlotCtx.fillText("Frame", energyPlot.width / 2, energyPlot.height - 2);
-    // Y axis label
-    energyPlotCtx.save();
-    energyPlotCtx.translate(10, energyPlot.height / 2);
-    energyPlotCtx.rotate(-Math.PI / 2);
-    energyPlotCtx.textAlign = "center";
-    energyPlotCtx.font = "14px Arial";
-    energyPlotCtx.fillText(plotType === "energy" ? "Energy" : "Magnetization", 0, 0);
-    energyPlotCtx.restore();
-    energyPlotCtx.restore();
-
-    // Plot line
-    energyPlotCtx.beginPath();
-    energyPlotCtx.strokeStyle = "#00ff00";
-    energyPlotCtx.lineWidth = 2;
-    let yMin, yMax;
-    if (plotType === "energy") {
-        yMin = -2 * Math.abs(j);
-        yMax = 2 * Math.abs(j);
-    } else {
-        yMin = -1;
-        yMax = 1;
-    }
-    // Map y values so that yMin maps to (energyPlot.height - 20) and yMax maps to 20
-    const plotTop = 20;
-    const plotBottom = energyPlot.height - 20;
-    for (let i = 0; i < plotHistory.length; i++) {
-        const x = 40 + ((energyPlot.width - 50) * i) / maxHistory;
-        let y = plotBottom - ((plotHistory[i] - yMin) / (yMax - yMin)) * (plotBottom - plotTop);
-        if (i === 0) {
-            energyPlotCtx.moveTo(x, y);
+        // Y labels
+        energyPlotCtx.save();
+        energyPlotCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
+        energyPlotCtx.fillStyle = "#fff";
+        energyPlotCtx.font = "12px Arial";
+        energyPlotCtx.textAlign = "right";
+        if (plotType === "energy") {
+            const ymin = -2 * Math.abs(j);
+            const ymax = 2 * Math.abs(j);
+            energyPlotCtx.fillText(ymin.toFixed(2), 35, energyPlot.height - 20);
+            energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
+            energyPlotCtx.fillText(ymax.toFixed(2), 35, 20);
         } else {
-            energyPlotCtx.lineTo(x, y);
+            energyPlotCtx.fillText("-1", 35, energyPlot.height - 20);
+            energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
+            energyPlotCtx.fillText("1", 35, 20);
         }
-    }
-    energyPlotCtx.stroke();
+        // X label
+        energyPlotCtx.textAlign = "center";
+        energyPlotCtx.font = "14px Arial";
+        energyPlotCtx.fillText("Frame", energyPlot.width / 2, energyPlot.height - 2);
+        // Y axis label
+        energyPlotCtx.save();
+        energyPlotCtx.translate(10, energyPlot.height / 2);
+        energyPlotCtx.rotate(-Math.PI / 2);
+        energyPlotCtx.textAlign = "center";
+        energyPlotCtx.font = "14px Arial";
+        energyPlotCtx.fillText(plotType === "energy" ? "Energy" : "Magnetization", 0, 0);
+        energyPlotCtx.restore();
+        energyPlotCtx.restore();
 
+        // Plot line
+        energyPlotCtx.beginPath();
+        energyPlotCtx.strokeStyle = "#00ff00";
+        energyPlotCtx.lineWidth = 2;
+        let yMin, yMax;
+        if (plotType === "energy") {
+            yMin = -2 * Math.abs(j);
+            yMax = 2 * Math.abs(j);
+        } else {
+            yMin = -1;
+            yMax = 1;
+        }
+        // Map y values so that yMin maps to (energyPlot.height - 20) and yMax maps to 20
+        const plotTop = 20;
+        const plotBottom = energyPlot.height - 20;
+        for (let i = 0; i < plotHistory.length; i++) {
+            const x = 40 + ((energyPlot.width - 50) * i) / maxHistory;
+            let y = plotBottom - ((plotHistory[i] - yMin) / (yMax - yMin)) * (plotBottom - plotTop);
+            if (i === 0) {
+                energyPlotCtx.moveTo(x, y);
+            } else {
+                energyPlotCtx.lineTo(x, y);
+            }
+        }
+        energyPlotCtx.stroke();
+    }
+    // Always continue animation
     animationId = requestAnimationFrame(render);
 }
 

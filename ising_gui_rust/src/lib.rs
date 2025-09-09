@@ -30,16 +30,16 @@ impl Ising {
     // Perform a single Metropolis-Hastings update
     #[wasm_bindgen]
     pub fn metropolis_step(&mut self) {
-        let mut rng = StdRng::from_entropy();
-        self.attempted += self.n * self.n;
-        let mut accepted = 0;
+        let mut rng = StdRng::from_entropy(); // Initialize rng
+        self.attempted += self.n * self.n; // Each step attempts n*n flips
+        let mut accepted: usize = 0; // Count accepted flips
         for _ in 0..self.n * self.n {
-            let i = rng.gen_range(0..self.n);
-            let j = rng.gen_range(0..self.n);
-            let idx = i * self.n + j;
+            let i = rng.gen_range(0..self.n); // Pick X coordinate
+            let j = rng.gen_range(0..self.n); // Pick Y coordinate
+            let idx = i * self.n + j; // Convert to 1D index
 
-            let s = self.spins[idx];
-            let mut sum = 0;
+            let s = self.spins[idx]; // Current spin
+            let mut sum = 0; // Initialize sum of neighbor spins
 
             let neighbors = [
                 ((i + 1) % self.n, j),
@@ -61,6 +61,7 @@ impl Ising {
         self.accepted += accepted;
     }
 
+    // Perform a single Glauber update
     #[wasm_bindgen]
     pub fn glauber_step(&mut self) {
         let mut rng = StdRng::from_entropy();

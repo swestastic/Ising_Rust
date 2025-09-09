@@ -56,6 +56,7 @@
           <select id="plot-type" style="margin-left: 8px;">
             <option value="energy" selected>Average Energy per Site</option>
             <option value="magnetization">Average Magnetization per Site</option>
+            <option value="none">None (Disable Plot)</option>
           </select>
         </label>
   <span style="color: white; font-family: 'Courier New', monospace;">E = <span id="energy-value">0.0000</span> &nbsp; M = <span id="magnetization-value">+0.0000</span></span>
@@ -85,7 +86,7 @@
       <li>Fix greyscale image output for cluster algorithms</li>
       <li>Better axes and higher resolution for plots</li>
       <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
-      <li>Add none option to suppress graph output</li>
+      <li>Update E and M based on local changes rather than constantly sweeping the lattice</li>
 
     </ul>
   </div>
@@ -101,6 +102,7 @@
       <li>Instantaneous E and M values</li>
       <li>Sweeps/second value</li>
       <li>Reset button</li>
+      <li>Plot disable option</li>
     </ul>
   </div>
 </html>
