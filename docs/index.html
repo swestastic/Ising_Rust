@@ -4,12 +4,14 @@
     <meta charset="utf-8">
     <title>Ising Model Simulation</title>
     <style>
-      body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; }
-  canvas { image-rendering: pixelated; border: 2px solid white; width: 400px; height: 400px; }
+      body { background: #222; min-height: 100vh; margin: 0; }
+      .main-content { display: flex; flex-direction: column; align-items: center; margin-top: 32px; }
+      canvas { image-rendering: pixelated; border: 2px solid white; width: 400px; height: 400px; }
     </style>
   </head>
   <body>
-  <div style="display: flex; flex-direction: column; align-items: center;">
+  <h1 style="color: white; text-align: center; margin-top: 32px; font-size: 2.5em; font-family: 'Arial', sans-serif; letter-spacing: 2px;">Ising Model Simulation</h1>
+  <div class="main-content">
   <label for="temp-slider" style="color: white; margin-bottom: 8px;">Temperature: 
     <input type="number" id="temp-value" min="0.1" max="5.0" step="0.01" value="2.27" style="width: 60px; margin-left: 8px;">
   </label>
@@ -67,42 +69,53 @@
   </div>
     </div>
     <script type="module" src="./index.js"></script>
-  </body>
-  <div style="color: white; position: absolute; top: 16px; left: 16px; background: rgba(34,34,34,0.9); padding: 16px; border-radius: 8px;">
-    <h3 style="margin-top: 0; margin-bottom: 8px;">TODO List</h3>
-    <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
-      <li>Implement Swendsen-Wang algorithm</li>
-      <li>Implement Heat Bath algorithm</li>
-      <li>Implement Kawasaki dynamics</li>
-      <li>J<0 functionality for wolff and swendsen-wang</li>
-      <li>Add export/save functionality for plots and data</li>
-      <li>Documentation/information about algorithms</li>
-      <li>Improve UI/UX design</li>
-      <li>Optimize performance for larger lattices</li>
-      <li>Add more plot options (e.g. specific heat, susceptibility, acceptance ratio)</li>
-      <li>Ensure physics are correct for all models</li>
-      <li>Code cleanup and comments</li>
-      <li>Live readout for average cluster size</li>
-      <li>Fix greyscale image output for cluster algorithms</li>
-      <li>Better axes and higher resolution for plots</li>
-      <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
-      <li>Update E and M based on local changes rather than constantly sweeping the lattice</li>
+  </div> <!-- closes main-content div -->
 
-    </ul>
+  <!-- Bottom Section: About, TODO, Completed -->
+  <div style="display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 32px; width: 100vw; max-width: 1200px; margin: 48px auto 24px auto;">
+    <div id="model-description" style="flex: 2; background: rgba(34,34,34,0.95); color: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px #000; min-width: 300px;">
+      <h2 style="margin-top: 0;">About the Ising Model</h2>
+      <div style="min-height: 40px; font-size: 1.1em; padding: 0; background: none; border: none;">The Ising model is a mathematical model of ferromagnetism in statistical mechanics. It consists of discrete variables that represent magnetic dipole moments of atomic spins, which can be in one of two states (+1 or −1). The model helps to understand phase transitions and critical phenomena in physics.</div>
+    </div>
+    <div style="flex: 1; min-width: 220px;">
+      <div style="background: rgba(34,34,34,0.9); color: white; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 2px 8px #000;">
+        <h3 style="margin-top: 0; margin-bottom: 8px;">TODO List</h3>
+        <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
+          <li>Implement Swendsen-Wang algorithm</li>
+          <li>Implement Heat Bath algorithm</li>
+          <li>Implement Kawasaki dynamics</li>
+          <li>J<0 functionality for wolff and swendsen-wang</li>
+          <li>Add export/save functionality for plots and data</li>
+          <li>Documentation/information about algorithms</li>
+          <li>Improve UI/UX design</li>
+          <li>Optimize performance for larger lattices</li>
+          <li>Add more plot options (e.g. specific heat, susceptibility, acceptance ratio)</li>
+          <li>Ensure physics are correct for all models</li>
+          <li>Code cleanup and comments</li>
+          <li>Live readout for average cluster size</li>
+          <li>Fix greyscale image output for cluster algorithms</li>
+          <li>Better axes and higher resolution for plots</li>
+          <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
+          <li>Update E and M based on local changes rather than constantly sweeping the lattice</li>
+          <li>Add runs over specific temp values and save data</li>
+        </ul>
+      </div>
+      <div style="background: rgba(34,34,34,0.9); color: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px #000;">
+        <h3 style="margin-top: 0; margin-bottom: 8px;">Currently Working</h3>
+        <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
+          <li>All aspects of Metropolis algorithm</li>
+          <li>All aspects of Wolff algorithm (h!=0 is slow)</li>
+          <li>All aspects of Glauber dynamics</li>
+          <li>Live image updates</li>
+          <li>Live plot updates</li>
+          <li>Plot selection dropdown</li>
+          <li>Instantaneous E and M values</li>
+          <li>Sweeps/second value</li>
+          <li>Reset button</li>
+          <li>Plot disable option</li>
+        </ul>
+      </div>
+    </div>
   </div>
-  <div style="color: white; position: absolute; top: 350px; left: 16px; background: rgba(34,34,34,0.9); padding: 16px; border-radius: 8px;">
-    <h3 style="margin-top: 0; margin-bottom: 8px;">Currently Working</h3>
-    <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
-      <li>All aspects of Metropolis algorithm</li>
-      <li>All aspects of Wolff algorithm (h!=0 is slow)</li>
-      <li>All aspects of Glauber dynamics</li>
-      <li>Live image updates</li>
-      <li>Live plot updates</li>
-      <li>Plot selection dropdown</li>
-      <li>Instantaneous E and M values</li>
-      <li>Sweeps/second value</li>
-      <li>Reset button</li>
-      <li>Plot disable option</li>
-    </ul>
-  </div>
+  </body>
 </html>
