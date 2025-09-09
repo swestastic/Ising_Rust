@@ -86,6 +86,9 @@ export class Ising {
     wolff_step() {
         wasm.ising_wolff_step(this.__wbg_ptr);
     }
+    heatbath_step() {
+        wasm.ising_heatbath_step(this.__wbg_ptr);
+    }
     /**
      * @param {number} h
      */

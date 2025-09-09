@@ -6,6 +6,7 @@ export class Ising {
   metropolis_step(): void;
   glauber_step(): void;
   wolff_step(): void;
+  heatbath_step(): void;
   set_h(h: number): void;
   acceptance_ratio(): number;
   avg_energy(): number;
@@ -24,6 +25,7 @@ export interface InitOutput {
   readonly ising_metropolis_step: (a: number) => void;
   readonly ising_glauber_step: (a: number) => void;
   readonly ising_wolff_step: (a: number) => void;
+  readonly ising_heatbath_step: (a: number) => void;
   readonly ising_set_h: (a: number, b: number) => void;
   readonly ising_acceptance_ratio: (a: number) => number;
   readonly ising_avg_energy: (a: number) => number;

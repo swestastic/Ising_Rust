@@ -170,7 +170,7 @@ function render() {
         } else if (algorithm === "swendsen-wang") {
             ising.swendsen_wang_step();
         } else if (algorithm === "heat-bath") {
-            ising.heat_bath_step();
+            ising.heatbath_step();
         } else if (algorithm === "glauber") {
             ising.glauber_step();
         } else if (algorithm === "kawasaki") {

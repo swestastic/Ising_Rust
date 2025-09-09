@@ -152,6 +152,48 @@ impl Ising {
         self.accepted += 1;
     }
 
+    // Perform a single Heat Bath update
+    #[wasm_bindgen]
+    pub fn heatbath_step(&mut self) {
+        let mut rng = StdRng::from_entropy();
+        self.attempted += self.n * self.n;
+        let mut accepted = 0;
+        for _ in 0..self.n * self.n {
+            let i = rng.gen_range(0..self.n);
+            let j = rng.gen_range(0..self.n);
+            let idx = i * self.n + j;
+
+            // Sum over neighbors
+            let mut sum = 0;
+            let neighbors = [
+                ((i + 1) % self.n, j),
+                ((i + self.n - 1) % self.n, j),
+                (i, (j + 1) % self.n),
+                (i, (j + self.n - 1) % self.n),
+            ];
+            for (ni, nj) in neighbors {
+                sum += self.spins[ni * self.n + nj];
+            }
+
+            // Local field
+            let local_field = self.j * sum as f64 + self.h;
+            // Probability for spin up (+1)
+            let p_up = 1.0 / (1.0 + (-2.0 * local_field / self.temp).exp());
+
+            let old_spin = self.spins[idx];
+            // Set spin according to probability
+            if rng.gen_range(0.0..1.0) < p_up {
+                self.spins[idx] = 1;
+            } else {
+                self.spins[idx] = -1;
+            }
+            if self.spins[idx] != old_spin {
+                accepted += 1;
+            }
+        }
+        self.accepted += accepted;
+    }
+
     // Set external field h from JS
     #[wasm_bindgen]
     pub fn set_h(&mut self, h: f64) {
