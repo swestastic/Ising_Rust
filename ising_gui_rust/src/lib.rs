@@ -87,7 +87,7 @@ impl Ising {
             }
 
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
-            if d_e <= 0.0 || rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
+            if rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
                 self.spins[idx] = -s;
                 accepted += 1;
             }
