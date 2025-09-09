@@ -102,6 +102,8 @@ impl Ising {
         let mut rng = StdRng::from_entropy();
         let n = self.n;
         let p_add = 1.0 - (-2.0 * self.j / self.temp).exp();
+        let ghost_spin: i8 = if self.h >= 0.0 { 1 } else { -1 };
+        let p_ghost = 1.0 - (-2.0 * self.h.abs() / self.temp).exp();
 
         // Pick a random seed site
         let i0 = rng.gen_range(0..n);
@@ -121,9 +123,10 @@ impl Ising {
             // For each site, check connection to ghost spin
             let idx = i * n + j;
             let s = self.spins[idx];
-            let p_ext = 1.0 - (-2.0 * self.h * s as f64 / self.temp).exp();
-            if !connected_to_ghost && rng.gen_range(0.0..1.0) < p_ext {
-                connected_to_ghost = true;
+            if !connected_to_ghost && s == ghost_spin {
+                if rng.gen_range(0.0..1.0) < p_ghost {
+                    connected_to_ghost = true;
+                }
             }
             let neighbors = [
                 ((i + 1) % n, j),
