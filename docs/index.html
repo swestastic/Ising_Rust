@@ -83,18 +83,22 @@
           </p>
 
 
-          <p>The sliders and input boxes for temperature (T), coupling (J), and external field (h) allow users to adjust the parameters of the Ising model in real-time.
-            
-          <br>The lattice size dropdown lets users select the size of the 2D lattice (from 8x8 to 512x512).
-          
-          <br>The plot dropdown lets users select which quantity to plot over time: average energy per site, average magnetization per site, or disable the plot entirely.
-          
-          <br>The reset button reinitializes the lattice with random spins and resets the simulation statistics.
-          
-          <br>The sweeps per frame slider allows users to control how many Monte Carlo sweeps are performed between each frame update, affecting the speed of the simulation.
-          
-          <br>Making this value larger will speed up the simulation significantly since it will not have to render as often, but visually it will be less smooth,
-          especially for larger lattices.
+          <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
+            <li>T slider adjusts temperature of the simulation. Default value is the critical Temperature - approximately 2.269185 J/k (k=1 for this simulation)</li>
+            <li>J slider adjusts the coupling constant between spins. The default value is 1.0.
+                Positive J favors alignment (ferromagnetic) while negative J favors anti-alignment (antiferromagnetic).
+            </li>
+            <li>h slider adjusts the external magnetic field applied to the system. The default value is 0.0.
+                Positive h favors +1 spins while negative h favors -1 spins.
+            </li>
+            <li>The sweeps per frame slider allows users to control how many Monte Carlo sweeps are performed between each frame update, affecting the speed of the simulation.
+                The simulation speed is tied to the screen refresh rate, so it will be capped on monitors with lower refresh rates (typically 60Hz, 120Hz, or 144Hz).
+                Making this value larger will speed up the simulation significantly since it will not have to render as often, but visually it will be less smooth, especially for larger lattices.
+            </li>
+            <li>Lattice size dropdown chooses size adjustment from 8x8 to 512x512</li>
+            <li>Plot dropdown chooses which quantity to plot over time: average energy per site, average magnetization per site, or disable the plot entirely.</li>
+            <li>Reset button reinitializes the lattice with random spins and resets the simulation statistics.</li>
+          </ul>
           </p>
         </div>
       </div>
