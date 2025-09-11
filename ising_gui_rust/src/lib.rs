@@ -93,7 +93,6 @@ impl Ising {
     #[wasm_bindgen]
     pub fn glauber_step(&mut self) {
         self.attempted += self.n * self.n;
-        let mut accepted = 0;
         for _ in 0..self.n * self.n {
             let i = self.rng.gen_range(0..self.n);
             let j = self.rng.gen_range(0..self.n);
@@ -116,12 +115,11 @@ impl Ising {
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
             if self.rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
                 self.spins[idx] = -s;
-                accepted += 1;
+                self.accepted += 1;
                 self.energy += d_e / (self.n * self.n) as f64;
                 self.magnetization += (self.spins[idx] as f64 - s as f64) / (self.n * self.n) as f64;
             }
         }
-        self.accepted += accepted;
     }
 
     // Perform a single Wolff cluster update
