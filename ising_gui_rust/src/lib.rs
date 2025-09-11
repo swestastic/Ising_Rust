@@ -233,6 +233,7 @@ impl Ising {
 
 
     // Expose pointer to spins for JS
+    #[wasm_bindgen]
     pub fn spins_ptr(&self) -> *const i8 {
         self.spins.as_ptr()
     }
