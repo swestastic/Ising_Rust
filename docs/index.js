@@ -216,10 +216,8 @@ function render() {
 
     // Update plot value and history
     // Always calculate both <E> and <M>
-    const energy = ising.avg_energy();
-    let sum = 0;
-    for (let i = 0; i < spins.length; i++) sum += spins[i];
-    const magnetization = sum / spins.length;
+    const energy = ising.energy();
+    const magnetization = ising.magnetization();
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
     acceptanceRatioValue.textContent = ising.acceptance_ratio().toFixed(4);

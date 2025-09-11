@@ -105,8 +105,15 @@ export class Ising {
     /**
      * @returns {number}
      */
-    avg_energy() {
-        const ret = wasm.ising_avg_energy(this.__wbg_ptr);
+    energy() {
+        const ret = wasm.ising_energy(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    magnetization() {
+        const ret = wasm.ising_magnetization(this.__wbg_ptr);
         return ret;
     }
     /**

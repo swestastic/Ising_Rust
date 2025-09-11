@@ -9,7 +9,8 @@ export class Ising {
   heatbath_step(): void;
   set_h(h: number): void;
   acceptance_ratio(): number;
-  avg_energy(): number;
+  energy(): number;
+  magnetization(): number;
   spins_ptr(): number;
   size(): number;
   set_temp(temp: number): void;
@@ -28,7 +29,8 @@ export interface InitOutput {
   readonly ising_heatbath_step: (a: number) => void;
   readonly ising_set_h: (a: number, b: number) => void;
   readonly ising_acceptance_ratio: (a: number) => number;
-  readonly ising_avg_energy: (a: number) => number;
+  readonly ising_energy: (a: number) => number;
+  readonly ising_magnetization: (a: number) => number;
   readonly ising_spins_ptr: (a: number) => number;
   readonly ising_size: (a: number) => number;
   readonly ising_set_temp: (a: number, b: number) => void;

@@ -3,6 +3,29 @@ use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::SmallRng;
 
+// Standalone function to calculate average energy per spin
+fn calc_avg_energy(spins: &[i8], n: usize, j: f64, h: f64) -> f64 {
+    let mut e = 0.0;
+    for i in 0..n {
+        for j_idx in 0..n {
+            let idx = i * n + j_idx;
+            let s = spins[idx] as f64;
+            // bonds right and down to avoid double count
+            e -= j * s * spins[((i + 1) % n) * n + j_idx] as f64;
+            e -= j * s * spins[i * n + ((j_idx + 1) % n)] as f64;
+            // field term
+            e -= h * s;
+        }
+    }
+    e / (n * n) as f64
+}
+
+// Standalone function to calculate average magnetization per spin
+fn calc_avg_magnetization(spins: &[i8], n: usize) -> f64 {
+    let sum: i32 = spins.iter().map(|&s| s as i32).sum();
+    sum as f64 / (n * n) as f64
+}
+
 #[wasm_bindgen]
 pub struct Ising {
     n: usize,
@@ -13,6 +36,8 @@ pub struct Ising {
     accepted: usize,
     attempted: usize,
     rng: SmallRng,
+    energy: f64,
+    magnetization: f64,
 }
 
 #[wasm_bindgen]
@@ -21,18 +46,20 @@ impl Ising {
     // Create a new Ising model with random spins
     #[wasm_bindgen(constructor)]
     pub fn new(n: usize, temp: f64, j: f64) -> Self {
-    let mut rng = SmallRng::from_entropy();
-        let spins = (0..n * n)
+        let mut rng = SmallRng::from_entropy();
+        let spins: Vec<i8> = (0..n * n)
             .map(|_| if rng.gen_range(0.0..1.0) > 0.5 { 1 } else { -1 })
             .collect();
-    Self { n, spins, temp, j, h: 0.0, accepted: 0, attempted: 0, rng }
+        // Calculate initial energy using standalone function
+        let e = calc_avg_energy(&spins, n, j, 0.0);
+        let m = calc_avg_magnetization(&spins, n);
+        Self { n, spins, temp, j, h: 0.0, accepted: 0, attempted: 0, rng, energy: e, magnetization: m }
     }
 
     // Perform a single Metropolis-Hastings update
     #[wasm_bindgen]
     pub fn metropolis_step(&mut self) {
         self.attempted += self.n * self.n; // Each step attempts n*n flips
-        let mut accepted: usize = 0; // Count accepted flips
         for _ in 0..self.n * self.n {
             let i = self.rng.gen_range(0..self.n); // Pick X coordinate
             let j = self.rng.gen_range(0..self.n); // Pick Y coordinate
@@ -55,10 +82,11 @@ impl Ising {
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
             if d_e <= 0.0 || self.rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
                 self.spins[idx] = -s;
-                accepted += 1;
+                self.accepted += 1;
+                self.energy += d_e / (self.n * self.n) as f64;
+                self.magnetization += (self.spins[idx] as f64 - s as f64) / (self.n * self.n) as f64;
             }
         }
-        self.accepted += accepted;
     }
 
     // Perform a single Glauber update
@@ -89,6 +117,8 @@ impl Ising {
             if self.rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
                 self.spins[idx] = -s;
                 accepted += 1;
+                self.energy += d_e / (self.n * self.n) as f64;
+                self.magnetization += (self.spins[idx] as f64 - s as f64) / (self.n * self.n) as f64;
             }
         }
         self.accepted += accepted;
@@ -151,6 +181,8 @@ impl Ising {
         }
         self.attempted += 1;
         self.accepted += 1;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+        self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
     // Perform a single Heat Bath update
@@ -192,6 +224,8 @@ impl Ising {
             }
         }
         self.accepted += accepted;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+        self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
     // Set external field h from JS
@@ -200,7 +234,6 @@ impl Ising {
         self.h = h;
     }
 
-    
     // Get acceptance ratio
     #[wasm_bindgen]
     pub fn acceptance_ratio(&self) -> f64 {
@@ -211,26 +244,17 @@ impl Ising {
         }
     }
 
-    // Calculate average energy per spin
+    // Get current energy per spin
     #[wasm_bindgen]
-    pub fn avg_energy(&self) -> f64 {
-        let n = self.n;
-        let mut e = 0.0;
-        for i in 0..n {
-            for j in 0..n {
-                let idx = i * n + j;
-                let s = self.spins[idx] as f64;
-                // bonds right and down to avoid double count
-                e -= self.j * s * self.spins[((i + 1) % n) * n + j] as f64;
-                e -= self.j * s * self.spins[i * n + ((j + 1) % n)] as f64;
-                // field term
-                e -= self.h * s;
-            }
-        }
-        e / (n * n) as f64
+    pub fn energy(&self) -> f64 {
+        self.energy
     }
 
-
+    // Get current magnetization per spin
+    #[wasm_bindgen]
+    pub fn magnetization(&self) -> f64 {
+        self.magnetization
+    }
 
     // Expose pointer to spins for JS
     #[wasm_bindgen]
