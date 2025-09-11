@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 use rand::Rng;
 use rand::SeedableRng;
-use rand::rngs::StdRng;
+use rand::rngs::SmallRng;
 
 #[wasm_bindgen]
 pub struct Ising {
@@ -12,6 +12,7 @@ pub struct Ising {
     h: f64,
     accepted: usize,
     attempted: usize,
+    rng: SmallRng,
 }
 
 #[wasm_bindgen]
@@ -20,22 +21,21 @@ impl Ising {
     // Create a new Ising model with random spins
     #[wasm_bindgen(constructor)]
     pub fn new(n: usize, temp: f64, j: f64) -> Self {
-        let mut rng = StdRng::from_entropy();
+    let mut rng = SmallRng::from_entropy();
         let spins = (0..n * n)
             .map(|_| if rng.gen_range(0.0..1.0) > 0.5 { 1 } else { -1 })
             .collect();
-        Self { n, spins, temp, j, h: 0.0, accepted: 0, attempted: 0 }
+    Self { n, spins, temp, j, h: 0.0, accepted: 0, attempted: 0, rng }
     }
 
     // Perform a single Metropolis-Hastings update
     #[wasm_bindgen]
     pub fn metropolis_step(&mut self) {
-        let mut rng = StdRng::from_entropy(); // Initialize rng
         self.attempted += self.n * self.n; // Each step attempts n*n flips
         let mut accepted: usize = 0; // Count accepted flips
         for _ in 0..self.n * self.n {
-            let i = rng.gen_range(0..self.n); // Pick X coordinate
-            let j = rng.gen_range(0..self.n); // Pick Y coordinate
+            let i = self.rng.gen_range(0..self.n); // Pick X coordinate
+            let j = self.rng.gen_range(0..self.n); // Pick Y coordinate
             let idx = i * self.n + j; // Convert to 1D index
 
             let s = self.spins[idx]; // Current spin
@@ -53,7 +53,7 @@ impl Ising {
             }
 
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
-            if d_e <= 0.0 || rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
+            if d_e <= 0.0 || self.rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
                 self.spins[idx] = -s;
                 accepted += 1;
             }
@@ -64,12 +64,11 @@ impl Ising {
     // Perform a single Glauber update
     #[wasm_bindgen]
     pub fn glauber_step(&mut self) {
-        let mut rng = StdRng::from_entropy();
         self.attempted += self.n * self.n;
         let mut accepted = 0;
         for _ in 0..self.n * self.n {
-            let i = rng.gen_range(0..self.n);
-            let j = rng.gen_range(0..self.n);
+            let i = self.rng.gen_range(0..self.n);
+            let j = self.rng.gen_range(0..self.n);
             let idx = i * self.n + j;
 
             let s = self.spins[idx];
@@ -87,7 +86,7 @@ impl Ising {
             }
 
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
-            if rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
+            if self.rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {
                 self.spins[idx] = -s;
                 accepted += 1;
             }
@@ -99,15 +98,14 @@ impl Ising {
     #[wasm_bindgen]
     pub fn wolff_step(&mut self) {
         use std::collections::VecDeque;
-        let mut rng = StdRng::from_entropy();
         let n = self.n;
         let p_add = 1.0 - (-2.0 * self.j / self.temp).exp();
         let ghost_spin: i8 = if self.h >= 0.0 { 1 } else { -1 };
         let p_ghost = 1.0 - (-2.0 * self.h.abs() / self.temp).exp();
 
         // Pick a random seed site
-        let i0 = rng.gen_range(0..n);
-        let j0 = rng.gen_range(0..n);
+        let i0 = self.rng.gen_range(0..n);
+    let j0 = self.rng.gen_range(0..n);
         let seed_spin = self.spins[i0 * n + j0];
 
         let mut visited = vec![false; n * n];
@@ -124,7 +122,7 @@ impl Ising {
             let idx = i * n + j;
             let s = self.spins[idx];
             if !connected_to_ghost && s == ghost_spin {
-                if rng.gen_range(0.0..1.0) < p_ghost {
+            if self.rng.gen_range(0.0..1.0) < p_ghost {
                     connected_to_ghost = true;
                 }
             }
@@ -137,7 +135,7 @@ impl Ising {
             for (ni, nj) in neighbors {
                 let nidx = ni * n + nj;
                 if !visited[nidx] && self.spins[nidx] == seed_spin {
-                    if rng.gen_range(0.0..1.0) < p_add {
+                if self.rng.gen_range(0.0..1.0) < p_add {
                         visited[nidx] = true;
                         queue.push_back((ni, nj));
                         cluster_sites.push((ni, nj));
@@ -158,12 +156,11 @@ impl Ising {
     // Perform a single Heat Bath update
     #[wasm_bindgen]
     pub fn heatbath_step(&mut self) {
-        let mut rng = StdRng::from_entropy();
         self.attempted += self.n * self.n;
         let mut accepted = 0;
         for _ in 0..self.n * self.n {
-            let i = rng.gen_range(0..self.n);
-            let j = rng.gen_range(0..self.n);
+            let i = self.rng.gen_range(0..self.n);
+            let j = self.rng.gen_range(0..self.n);
             let idx = i * self.n + j;
 
             // Sum over neighbors
@@ -185,7 +182,7 @@ impl Ising {
 
             let old_spin = self.spins[idx];
             // Set spin according to probability
-            if rng.gen_range(0.0..1.0) < p_up {
+            if self.rng.gen_range(0.0..1.0) < p_up {
                 self.spins[idx] = 1;
             } else {
                 self.spins[idx] = -1;
