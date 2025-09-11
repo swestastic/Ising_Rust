@@ -134,6 +134,8 @@ async function run() {
         lastTime = performance.now();
         lastSweepCount = 0;
         render.sweepCount = 0;
+        sweepsHistory = [];
+        timeHistory = [];
         if (animationId) {
             cancelAnimationFrame(animationId);
         }
@@ -158,6 +160,8 @@ function setupIsing(size) {
 
 let lastTime = performance.now();
 let lastSweepCount = 0;
+let sweepsHistory = [];
+let timeHistory = [];
 
 function render() {
     // No scaling needed for square aspect ratio, use default transform
@@ -182,11 +186,18 @@ function render() {
     const now = performance.now();
     if (!render.sweepCount) render.sweepCount = 0;
     render.sweepCount += sweepsPerFrame;
-    if (now - lastTime > 1000) {
-        const sweepsPerSec = (render.sweepCount - lastSweepCount) / ((now - lastTime) / 1000);
-        sweepsPerSecValue.textContent = sweepsPerSec.toFixed(1);
-        lastTime = now;
-        lastSweepCount = render.sweepCount;
+    sweepsHistory.push(render.sweepCount);
+    timeHistory.push(now);
+    // Keep only last 30 seconds of history
+    while (timeHistory.length > 0 && now - timeHistory[0] > 30000) {
+        timeHistory.shift();
+        sweepsHistory.shift();
+    }
+    if (timeHistory.length > 1) {
+        const dt = (timeHistory[timeHistory.length - 1] - timeHistory[0]) / 1000;
+        const dsweeps = sweepsHistory[sweepsHistory.length - 1] - sweepsHistory[0];
+        const sweepsPerSecAvg = dsweeps / dt;
+        sweepsPerSecValue.textContent = sweepsPerSecAvg.toFixed(1);
     }
     const ptr = ising.spins_ptr();
     const spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
