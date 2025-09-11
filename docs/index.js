@@ -8,6 +8,7 @@ let temp = 2.0;
 let j = 1.0;
 let h = 0.0;
 let canvas, ctx, imageData, pixels;
+let spins = null;
 let animationId;
 let algorithm = "metropolis";
 let sweepsPerFrame = 1;
@@ -156,6 +157,9 @@ function setupIsing(size) {
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(size, size);
     pixels = imageData.data;
+    // Create/reuse spins typed array
+    const ptr = ising.spins_ptr();
+    spins = new Int8Array(wasm.memory.buffer, ptr, size * size);
 }
 
 let lastTime = performance.now();
@@ -199,8 +203,11 @@ function render() {
         const sweepsPerSecAvg = dsweeps / dt;
         sweepsPerSecValue.textContent = sweepsPerSecAvg.toFixed(1);
     }
+    // If the buffer address or size changes (e.g., after lattice size change), recreate spins array
     const ptr = ising.spins_ptr();
-    const spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
+    if (!spins || spins.buffer !== wasm.memory.buffer || spins.byteOffset !== ptr || spins.length !== n * n) {
+        spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
+    }
     for (let i = 0; i < spins.length; i++) {
         const color = spins[i] === 1 ? 255 : 0;
         const j = i * 4;
