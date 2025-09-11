@@ -208,13 +208,9 @@ function render() {
     if (!spins || spins.buffer !== wasm.memory.buffer || spins.byteOffset !== ptr || spins.length !== n * n) {
         spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
     }
+    const buf32 = new Uint32Array(imageData.data.buffer);
     for (let i = 0; i < spins.length; i++) {
-        const color = spins[i] === 1 ? 255 : 0;
-        const j = i * 4;
-        pixels[j] = color;
-        pixels[j + 1] = color;
-        pixels[j + 2] = color;
-        pixels[j + 3] = 255;
+        buf32[i] = spins[i] === 1 ? 0xffffffff : 0xff000000; // white : black
     }
     ctx.putImageData(imageData, 0, 0);
 
