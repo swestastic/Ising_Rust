@@ -7,7 +7,7 @@ let n = 100; // default lattice size
 let temp = 2.0;
 let j = 1.0;
 let h = 0.0;
-let canvas, ctx, imageData, pixels;
+let canvas, ctx, imageData;
 let spins = null;
 let animationId;
 let algorithm = "metropolis";
@@ -143,6 +143,20 @@ async function run() {
         render();
     });
 
+    const resetDataBtn = document.getElementById("reset-data-btn");
+    resetDataBtn.addEventListener("click", () => {
+        plotHistory = [];
+        lastTime = performance.now();
+        lastSweepCount = 0;
+        render.sweepCount = 0;
+        sweepsHistory = [];
+        timeHistory = [];
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+        render();
+    });
+
     render();
 }
 
@@ -156,7 +170,6 @@ function setupIsing(size) {
     canvas.style.height = "400px";
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(size, size);
-    pixels = imageData.data;
     // Create/reuse spins typed array
     const ptr = ising.spins_ptr();
     spins = new Int8Array(wasm.memory.buffer, ptr, size * size);
@@ -222,7 +235,7 @@ function render() {
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
     acceptanceRatioValue.textContent = ising.acceptance_ratio().toFixed(4);
     let value = plotType === "energy" ? energy : magnetization;
-    if (plotType !== "none") {
+    if (plotType !== "no_plot") {
         // Plot selected value
         plotHistory.push(value);
         if (plotHistory.length > maxHistory) plotHistory.shift();

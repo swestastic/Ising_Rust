@@ -48,6 +48,7 @@
   <label for="skip-slider" style="color: white; margin-bottom: 8px;">Sweeps per frame: <span id="skip-value">1</span></label>
   <input type="range" id="skip-slider" min="1" max="20" step="1" value="1" style="width: 300px; margin-bottom: 16px;">
   <button id="reset-btn" style="display: block; margin: 0 auto 16px auto;">Reset</button>
+  <button id="reset-data-btn" style="display: block; margin: 0 auto 16px auto;">Reset Data</button>
   <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 24px; margin-top: 16px;">
     <canvas id="canvas"></canvas>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -58,7 +59,7 @@
           <select id="plot-type" style="margin-left: 8px;">
             <option value="energy" selected>Energy per Site</option>
             <option value="magnetization">Magnetization per Site</option>
-            <option value="none">None (Disable Plot)</option>
+            <option value="no_plot">None (Disable Plot)</option>
           </select>
         </label>
   <span style="color: white; font-family: 'Courier New', monospace;">E = <span id="energy-value">0.0000</span> &nbsp; M = <span id="magnetization-value">+0.0000</span></span>
