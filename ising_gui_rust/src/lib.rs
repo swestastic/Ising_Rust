@@ -226,20 +226,16 @@ impl Ising {
         self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
-    // Set external field h from JS
+    // Get accepted spins
     #[wasm_bindgen]
-    pub fn set_h(&mut self, h: f64) {
-        self.h = h;
+    pub fn accepted(&self) -> f64 {
+        self.accepted as f64
     }
 
-    // Get acceptance ratio
+    // Get attempted spins
     #[wasm_bindgen]
-    pub fn acceptance_ratio(&self) -> f64 {
-        if self.attempted == 0 {
-            0.0
-        } else {
-            self.accepted as f64 / self.attempted as f64
-        }
+    pub fn attempted(&self) -> f64 {
+        self.attempted as f64
     }
 
     // Get current energy per spin
@@ -275,5 +271,13 @@ impl Ising {
     #[wasm_bindgen]
     pub fn set_j(&mut self, j: f64) {
         self.j = j;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+    }
+
+    // Set external field h from JS
+    #[wasm_bindgen]
+    pub fn set_h(&mut self, h: f64) {
+        self.h = h;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
     }
 }

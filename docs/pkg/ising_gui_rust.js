@@ -90,16 +90,17 @@ export class Ising {
         wasm.ising_heatbath_step(this.__wbg_ptr);
     }
     /**
-     * @param {number} h
+     * @returns {number}
      */
-    set_h(h) {
-        wasm.ising_set_h(this.__wbg_ptr, h);
+    accepted() {
+        const ret = wasm.ising_accepted(this.__wbg_ptr);
+        return ret;
     }
     /**
      * @returns {number}
      */
-    acceptance_ratio() {
-        const ret = wasm.ising_acceptance_ratio(this.__wbg_ptr);
+    attempted() {
+        const ret = wasm.ising_attempted(this.__wbg_ptr);
         return ret;
     }
     /**
@@ -141,6 +142,12 @@ export class Ising {
      */
     set_j(j) {
         wasm.ising_set_j(this.__wbg_ptr, j);
+    }
+    /**
+     * @param {number} h
+     */
+    set_h(h) {
+        wasm.ising_set_h(this.__wbg_ptr, h);
     }
 }
 

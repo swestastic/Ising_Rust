@@ -233,14 +233,14 @@ function render() {
     const magnetization = ising.magnetization();
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
-    acceptanceRatioValue.textContent = ising.acceptance_ratio().toFixed(4);
+    acceptanceRatioValue.textContent = (ising.accepted() / ising.attempted()).toFixed(4);
     let value;
     if (plotType === "energy") {
         value = energy;
     } else if (plotType === "magnetization") {
         value = magnetization;
     } else if (plotType === "acceptance_ratio") {
-        value = ising.acceptance_ratio();
+        value = (ising.accepted() / ising.attempted());
     } else {
         value = 0;
     }

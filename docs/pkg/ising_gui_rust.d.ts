@@ -7,14 +7,15 @@ export class Ising {
   glauber_step(): void;
   wolff_step(): void;
   heatbath_step(): void;
-  set_h(h: number): void;
-  acceptance_ratio(): number;
+  accepted(): number;
+  attempted(): number;
   energy(): number;
   magnetization(): number;
   spins_ptr(): number;
   size(): number;
   set_temp(temp: number): void;
   set_j(j: number): void;
+  set_h(h: number): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -27,14 +28,15 @@ export interface InitOutput {
   readonly ising_glauber_step: (a: number) => void;
   readonly ising_wolff_step: (a: number) => void;
   readonly ising_heatbath_step: (a: number) => void;
-  readonly ising_set_h: (a: number, b: number) => void;
-  readonly ising_acceptance_ratio: (a: number) => number;
+  readonly ising_accepted: (a: number) => number;
+  readonly ising_attempted: (a: number) => number;
   readonly ising_energy: (a: number) => number;
   readonly ising_magnetization: (a: number) => number;
   readonly ising_spins_ptr: (a: number) => number;
   readonly ising_size: (a: number) => number;
   readonly ising_set_temp: (a: number, b: number) => void;
   readonly ising_set_j: (a: number, b: number) => void;
+  readonly ising_set_h: (a: number, b: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
