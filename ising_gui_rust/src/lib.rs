@@ -26,6 +26,14 @@ fn calc_avg_magnetization(spins: &[i8], n: usize) -> f64 {
     sum as f64 / (n * n) as f64
 }
 
+fn neighbor_sum(spins: &[i8], n: usize, i: usize, j: usize) -> i8 {
+    let up = spins[((i + n - 1) % n) * n + j] as i8;
+    let down = spins[((i + 1) % n) * n + j] as i8;
+    let left = spins[i * n + ((j + n - 1) % n)] as i8;
+    let right = spins[i * n + ((j + 1) % n)] as i8;
+    up + down + left + right
+}
+
 #[wasm_bindgen]
 pub struct Ising {
     n: usize,
@@ -66,18 +74,8 @@ impl Ising {
             let idx = i * self.n + j; // Convert to 1D index
 
             let s = self.spins[idx]; // Current spin
-            let mut sum = 0; // Initialize sum of neighbor spins
 
-            let neighbors = [
-                ((i + 1) % self.n, j),
-                ((i + self.n - 1) % self.n, j),
-                (i, (j + 1) % self.n),
-                (i, (j + self.n - 1) % self.n),
-            ];
-
-            for (ni, nj) in neighbors {
-                sum += self.spins[ni * self.n + nj];
-            }
+            let sum = neighbor_sum(&self.spins, self.n, i, j);
 
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
             if d_e <= 0.0 || self.rng.gen_range(0.0..1.0) < (-d_e / self.temp).exp() {
@@ -99,18 +97,8 @@ impl Ising {
             let idx = i * self.n + j;
 
             let s = self.spins[idx];
-            let mut sum = 0;
 
-            let neighbors = [
-                ((i + 1) % self.n, j),
-                ((i + self.n - 1) % self.n, j),
-                (i, (j + 1) % self.n),
-                (i, (j + self.n - 1) % self.n),
-            ];
-
-            for (ni, nj) in neighbors {
-                sum += self.spins[ni * self.n + nj];
-            }
+            let sum = neighbor_sum(&self.spins, self.n, i, j);
 
             let d_e = 2.0 * self.j * s as f64 * sum as f64 + 2.0 * self.h * s as f64;
             if self.rng.gen_range(0.0..1.0) < 1.0 / (1.0 + (d_e / self.temp).exp()) {

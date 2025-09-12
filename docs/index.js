@@ -4,7 +4,7 @@ import init, { Ising } from "./pkg/ising_gui_rust.js";
 let wasm;
 let ising;
 let n = 64; // default lattice size
-let temp = 2.0;
+let temp = 2.27;
 let j = 1.0;
 let h = 0.0;
 let canvas, ctx, imageData;
