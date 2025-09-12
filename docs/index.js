@@ -12,7 +12,7 @@ let spins = null;
 let animationId;
 let algorithm = "metropolis";
 let sweepsPerFrame = 1;
-let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRatioValue, sweepsPerSecValue, energyPlot, energyPlotCtx;
+let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRatioValue, sweepsPerSecValue, livePlot, livePlotCtx;
 let plotHistory = [];
 const maxHistory = 400;
 let plotType = "energy";
@@ -52,8 +52,8 @@ async function run() {
         plotType = plotTypeDropdown.value;
         plotHistory = [];
     });
-    energyPlot = document.getElementById("energy-plot");
-    energyPlotCtx = energyPlot.getContext("2d");
+    livePlot = document.getElementById("live-plot");
+    livePlotCtx = livePlot.getContext("2d");
 
     setupIsing(n);
 
@@ -182,7 +182,7 @@ let timeHistory = [];
 
 function render() {
     // No scaling needed for square aspect ratio, use default transform
-    energyPlotCtx.setTransform(1, 0, 0, 1, 0, 0);
+    livePlotCtx.setTransform(1, 0, 0, 1, 0, 0);
     for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
         if (algorithm === "metropolis") {
             ising.metropolis_step();
@@ -234,82 +234,96 @@ function render() {
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
     acceptanceRatioValue.textContent = ising.acceptance_ratio().toFixed(4);
-    let value = plotType === "energy" ? energy : magnetization;
+    let value;
+    if (plotType === "energy") {
+        value = energy;
+    } else if (plotType === "magnetization") {
+        value = magnetization;
+    } else if (plotType === "acceptance_ratio") {
+        value = ising.acceptance_ratio();
+    } else {
+        value = 0;
+    }
     if (plotType !== "no_plot") {
         // Plot selected value
         plotHistory.push(value);
         if (plotHistory.length > maxHistory) plotHistory.shift();
 
         // Draw plot with axes and labels
-        energyPlotCtx.clearRect(0, 0, energyPlot.width, energyPlot.height);
+        livePlotCtx.clearRect(0, 0, livePlot.width, livePlot.height);
         // Axes
-        energyPlotCtx.strokeStyle = "#aaa";
-        energyPlotCtx.lineWidth = 1;
-        energyPlotCtx.beginPath();
+        livePlotCtx.strokeStyle = "#aaa";
+        livePlotCtx.lineWidth = 1;
+        livePlotCtx.beginPath();
         // Y axis
-        energyPlotCtx.moveTo(40, 10);
-        energyPlotCtx.lineTo(40, energyPlot.height - 20);
+        livePlotCtx.moveTo(40, 10);
+        livePlotCtx.lineTo(40, livePlot.height - 20);
         // X axis
-        energyPlotCtx.moveTo(40, energyPlot.height - 20);
-        energyPlotCtx.lineTo(energyPlot.width - 10, energyPlot.height - 20);
-        energyPlotCtx.stroke();
+        livePlotCtx.moveTo(40, livePlot.height - 20);
+        livePlotCtx.lineTo(livePlot.width - 10, livePlot.height - 20);
+        livePlotCtx.stroke();
 
         // Y labels
-        energyPlotCtx.save();
-        energyPlotCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
-        energyPlotCtx.fillStyle = "#fff";
-        energyPlotCtx.font = "12px Arial";
-        energyPlotCtx.textAlign = "right";
+        livePlotCtx.save();
+        livePlotCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
+        livePlotCtx.fillStyle = "#fff";
+        livePlotCtx.font = "12px Arial";
+        livePlotCtx.textAlign = "right";
         if (plotType === "energy") {
-            const ymin = -2 * Math.abs(j);
-            const ymax = 2 * Math.abs(j);
-            energyPlotCtx.fillText(ymin.toFixed(2), 35, energyPlot.height - 20);
-            energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
-            energyPlotCtx.fillText(ymax.toFixed(2), 35, 20);
+            const ymin = -2 * Math.abs(j) - Math.abs(h);
+            const ymax = 2 * Math.abs(j) + Math.abs(h);
+            livePlotCtx.fillText(ymin.toFixed(2), 35, livePlot.height - 20);
+            livePlotCtx.fillText("0", 35, livePlot.height / 2 + 5);
+            livePlotCtx.fillText(ymax.toFixed(2), 35, 20);
         } else {
-            energyPlotCtx.fillText("-1", 35, energyPlot.height - 20);
-            energyPlotCtx.fillText("0", 35, energyPlot.height / 2 + 5);
-            energyPlotCtx.fillText("1", 35, 20);
+            livePlotCtx.fillText("-1", 35, livePlot.height - 20);
+            livePlotCtx.fillText("0", 35, livePlot.height / 2 + 5);
+            livePlotCtx.fillText("1", 35, 20);
         }
         // X label
-        energyPlotCtx.textAlign = "center";
-        energyPlotCtx.font = "14px Arial";
-        energyPlotCtx.fillText("Frame", energyPlot.width / 2, energyPlot.height - 2);
+        livePlotCtx.textAlign = "center";
+        livePlotCtx.font = "14px Arial";
+        livePlotCtx.fillText("Frame", livePlot.width / 2, livePlot.height - 2);
         // Y axis label
-        energyPlotCtx.save();
-        energyPlotCtx.translate(10, energyPlot.height / 2);
-        energyPlotCtx.rotate(-Math.PI / 2);
-        energyPlotCtx.textAlign = "center";
-        energyPlotCtx.font = "14px Arial";
-        energyPlotCtx.fillText(plotType === "energy" ? "Energy" : "Magnetization", 0, 0);
-        energyPlotCtx.restore();
-        energyPlotCtx.restore();
+        livePlotCtx.save();
+        livePlotCtx.translate(10, livePlot.height / 2);
+        livePlotCtx.rotate(-Math.PI / 2);
+        livePlotCtx.textAlign = "center";
+        livePlotCtx.font = "14px Arial";
+        if (plotType === "acceptance_ratio") {
+            livePlotCtx.fillText("Acceptance Ratio", 0, 0);
+        } else if (plotType === "magnetization") {
+            livePlotCtx.fillText("Magnetization", 0, 0);
+        } else if (plotType === "energy") {
+            livePlotCtx.fillText("Energy", 0, 0);
+        }
+        livePlotCtx.restore();
 
         // Plot line
-        energyPlotCtx.beginPath();
-        energyPlotCtx.strokeStyle = "#00ff00";
-        energyPlotCtx.lineWidth = 2;
+        livePlotCtx.beginPath();
+        livePlotCtx.strokeStyle = "#00ff00";
+        livePlotCtx.lineWidth = 2;
         let yMin, yMax;
         if (plotType === "energy") {
-            yMin = -2 * Math.abs(j);
-            yMax = 2 * Math.abs(j);
+            yMin = -2 * Math.abs(j) - Math.abs(h);
+            yMax = 2 * Math.abs(j) + Math.abs(h);
         } else {
             yMin = -1;
             yMax = 1;
         }
-        // Map y values so that yMin maps to (energyPlot.height - 20) and yMax maps to 20
+        // Map y values so that yMin maps to (livePlot.height - 20) and yMax maps to 20
         const plotTop = 20;
-        const plotBottom = energyPlot.height - 20;
+        const plotBottom = livePlot.height - 20;
         for (let i = 0; i < plotHistory.length; i++) {
-            const x = 40 + ((energyPlot.width - 50) * i) / maxHistory;
+            const x = 40 + ((livePlot.width - 50) * i) / maxHistory;
             let y = plotBottom - ((plotHistory[i] - yMin) / (yMax - yMin)) * (plotBottom - plotTop);
             if (i === 0) {
-                energyPlotCtx.moveTo(x, y);
+                livePlotCtx.moveTo(x, y);
             } else {
-                energyPlotCtx.lineTo(x, y);
+                livePlotCtx.lineTo(x, y);
             }
         }
-        energyPlotCtx.stroke();
+        livePlotCtx.stroke();
     }
     // Always continue animation
     animationId = requestAnimationFrame(render);
