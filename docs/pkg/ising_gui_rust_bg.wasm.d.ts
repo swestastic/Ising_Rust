@@ -12,7 +12,6 @@ export const ising_attempted: (a: number) => number;
 export const ising_energy: (a: number) => number;
 export const ising_magnetization: (a: number) => number;
 export const ising_spins_ptr: (a: number) => number;
-export const ising_size: (a: number) => number;
 export const ising_set_temp: (a: number, b: number) => void;
 export const ising_set_j: (a: number, b: number) => void;
 export const ising_set_h: (a: number, b: number) => void;

@@ -92,43 +92,36 @@ export class Ising {
     /**
      * @returns {number}
      */
-    accepted() {
+    get accepted() {
         const ret = wasm.ising_accepted(this.__wbg_ptr);
         return ret;
     }
     /**
      * @returns {number}
      */
-    attempted() {
+    get attempted() {
         const ret = wasm.ising_attempted(this.__wbg_ptr);
         return ret;
     }
     /**
      * @returns {number}
      */
-    energy() {
+    get energy() {
         const ret = wasm.ising_energy(this.__wbg_ptr);
         return ret;
     }
     /**
      * @returns {number}
      */
-    magnetization() {
+    get magnetization() {
         const ret = wasm.ising_magnetization(this.__wbg_ptr);
         return ret;
     }
     /**
      * @returns {number}
      */
-    spins_ptr() {
+    get spins_ptr() {
         const ret = wasm.ising_spins_ptr(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * @returns {number}
-     */
-    size() {
-        const ret = wasm.ising_size(this.__wbg_ptr);
         return ret >>> 0;
     }
     /**

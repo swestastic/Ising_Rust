@@ -3,7 +3,7 @@ import init, { Ising } from "./pkg/ising_gui_rust.js";
 
 let wasm;
 let ising;
-let n = 100; // default lattice size
+let n = 64; // default lattice size
 let temp = 2.0;
 let j = 1.0;
 let h = 0.0;
@@ -172,7 +172,7 @@ function setupIsing(size) {
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(size, size);
     // Create/reuse spins typed array
-    const ptr = ising.spins_ptr();
+    const ptr = ising.spins_ptr;
     spins = new Int8Array(wasm.memory.buffer, ptr, size * size);
 }
 
@@ -218,7 +218,7 @@ function render() {
         sweepsPerSecValue.textContent = sweepsPerSecAvg.toFixed(1);
     }
     // If the buffer address or size changes (e.g., after lattice size change), recreate spins array
-    const ptr = ising.spins_ptr();
+    const ptr = ising.spins_ptr;
     if (!spins || spins.buffer !== wasm.memory.buffer || spins.byteOffset !== ptr || spins.length !== n * n) {
         spins = new Int8Array(wasm.memory.buffer, ptr, n * n);
     }
@@ -230,18 +230,18 @@ function render() {
 
     // Update plot value and history
     // Always calculate both <E> and <M>
-    const energy = ising.energy();
-    const magnetization = ising.magnetization();
+    const energy = ising.energy;
+    const magnetization = ising.magnetization;
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
-    acceptanceRatioValue.textContent = (ising.accepted() / ising.attempted()).toFixed(4);
+    acceptanceRatioValue.textContent = (ising.accepted / ising.attempted).toFixed(4);
     let value;
     if (plotType === "energy") {
         value = energy;
     } else if (plotType === "magnetization") {
         value = magnetization;
     } else if (plotType === "acceptance_ratio") {
-        value = (ising.accepted() / ising.attempted());
+        value = (ising.accepted / ising.attempted);
     } else {
         value = 0;
     }

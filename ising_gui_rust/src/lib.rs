@@ -187,7 +187,6 @@ impl Ising {
     #[wasm_bindgen]
     pub fn heatbath_step(&mut self) {
         self.attempted += self.n * self.n;
-        let mut accepted = 0;
         for _ in 0..self.n * self.n {
             let i = self.rng.gen_range(0..self.n);
             let j = self.rng.gen_range(0..self.n);
@@ -218,47 +217,41 @@ impl Ising {
                 self.spins[idx] = -1;
             }
             if self.spins[idx] != old_spin {
-                accepted += 1;
+                self.accepted += 1;
             }
         }
-        self.accepted += accepted;
         self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
         self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
     // Get accepted spins
-    #[wasm_bindgen]
+    #[wasm_bindgen(getter)]
     pub fn accepted(&self) -> f64 {
         self.accepted as f64
     }
 
     // Get attempted spins
-    #[wasm_bindgen]
+    #[wasm_bindgen(getter)]
     pub fn attempted(&self) -> f64 {
         self.attempted as f64
     }
 
     // Get current energy per spin
-    #[wasm_bindgen]
+    #[wasm_bindgen(getter)]
     pub fn energy(&self) -> f64 {
         self.energy
     }
 
     // Get current magnetization per spin
-    #[wasm_bindgen]
+    #[wasm_bindgen(getter)]
     pub fn magnetization(&self) -> f64 {
         self.magnetization
     }
 
     // Expose pointer to spins for JS
-    #[wasm_bindgen]
+    #[wasm_bindgen(getter)]
     pub fn spins_ptr(&self) -> *const i8 {
         self.spins.as_ptr()
-    }
-
-    // Expose size of the lattice for JS
-    pub fn size(&self) -> usize {
-        self.n
     }
 
     // Set temperature from JS

@@ -7,16 +7,15 @@ export class Ising {
   glauber_step(): void;
   wolff_step(): void;
   heatbath_step(): void;
-  accepted(): number;
-  attempted(): number;
-  energy(): number;
-  magnetization(): number;
-  spins_ptr(): number;
-  size(): number;
   set_temp(temp: number): void;
   set_j(j: number): void;
   set_h(h: number): void;
   reset_data(): void;
+  readonly accepted: number;
+  readonly attempted: number;
+  readonly energy: number;
+  readonly magnetization: number;
+  readonly spins_ptr: number;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -34,7 +33,6 @@ export interface InitOutput {
   readonly ising_energy: (a: number) => number;
   readonly ising_magnetization: (a: number) => number;
   readonly ising_spins_ptr: (a: number) => number;
-  readonly ising_size: (a: number) => number;
   readonly ising_set_temp: (a: number, b: number) => void;
   readonly ising_set_j: (a: number, b: number) => void;
   readonly ising_set_h: (a: number, b: number) => void;
