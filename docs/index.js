@@ -145,6 +145,7 @@ async function run() {
 
     const resetDataBtn = document.getElementById("reset-data-btn");
     resetDataBtn.addEventListener("click", () => {
+        ising.reset_data();
         plotHistory = [];
         lastTime = performance.now();
         lastSweepCount = 0;

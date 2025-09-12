@@ -16,6 +16,7 @@ export class Ising {
   set_temp(temp: number): void;
   set_j(j: number): void;
   set_h(h: number): void;
+  reset_data(): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -37,6 +38,7 @@ export interface InitOutput {
   readonly ising_set_temp: (a: number, b: number) => void;
   readonly ising_set_j: (a: number, b: number) => void;
   readonly ising_set_h: (a: number, b: number) => void;
+  readonly ising_reset_data: (a: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

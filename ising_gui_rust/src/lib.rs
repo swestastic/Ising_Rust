@@ -280,4 +280,13 @@ impl Ising {
         self.h = h;
         self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
     }
+
+    // Reset data from JS
+    #[wasm_bindgen]
+    pub fn reset_data(&mut self) {
+        self.accepted = 0;
+        self.attempted = 0;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+        self.magnetization = calc_avg_magnetization(&self.spins, self.n);
+    }
 }

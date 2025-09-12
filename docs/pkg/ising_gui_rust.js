@@ -149,6 +149,9 @@ export class Ising {
     set_h(h) {
         wasm.ising_set_h(this.__wbg_ptr, h);
     }
+    reset_data() {
+        wasm.ising_reset_data(this.__wbg_ptr);
+    }
 }
 
 const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
