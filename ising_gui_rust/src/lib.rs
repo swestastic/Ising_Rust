@@ -181,17 +181,8 @@ impl Ising {
             let idx = i * self.n + j;
 
             // Sum over neighbors
-            let mut sum = 0;
-            let neighbors = [
-                ((i + 1) % self.n, j),
-                ((i + self.n - 1) % self.n, j),
-                (i, (j + 1) % self.n),
-                (i, (j + self.n - 1) % self.n),
-            ];
-            for (ni, nj) in neighbors {
-                sum += self.spins[ni * self.n + nj];
-            }
-
+            let sum = neighbor_sum(&self.spins, self.n, i, j);
+            
             // Local field
             let local_field = self.j * sum as f64 + self.h;
             // Probability for spin up (+1)
