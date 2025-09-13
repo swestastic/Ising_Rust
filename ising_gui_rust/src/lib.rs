@@ -34,6 +34,17 @@ fn neighbor_sum(spins: &[i8], n: usize, i: usize, j: usize) -> i8 {
     up + down + left + right
 }
 
+fn flip_sublattice(spins: &mut [i8], n: usize) {
+    for i in 0..n {
+        for j in 0..n {
+            if (i + j) % 2 == 0 {
+                let idx = i * n + j;
+                spins[idx] = -spins[idx];
+            }
+        }
+    }
+}
+
 #[wasm_bindgen]
 pub struct Ising {
     n: usize,
@@ -110,18 +121,22 @@ impl Ising {
         }
     }
 
-    // Perform a single Wolff cluster update
     #[wasm_bindgen]
     pub fn wolff_step(&mut self) {
         use std::collections::VecDeque;
         let n = self.n;
-        let p_add = 1.0 - (-2.0 * self.j / self.temp).exp();
+        let p_add = 1.0 - (-2.0 * self.j.abs() / self.temp).exp(); // use |J|
         let ghost_spin: i8 = if self.h >= 0.0 { 1 } else { -1 };
         let p_ghost = 1.0 - (-2.0 * self.h.abs() / self.temp).exp();
 
-        // Pick a random seed site
+        // Flip sublattice if antiferromagnetic
+        if self.j < 0.0 {
+            flip_sublattice(&mut self.spins, n);
+        }
+
+        // Pick random seed site
         let i0 = self.rng.gen_range(0..n);
-    let j0 = self.rng.gen_range(0..n);
+        let j0 = self.rng.gen_range(0..n);
         let seed_spin = self.spins[i0 * n + j0];
 
         let mut visited = vec![false; n * n];
@@ -134,14 +149,19 @@ impl Ising {
         let mut connected_to_ghost = false;
 
         while let Some((i, j)) = queue.pop_front() {
-            // For each site, check connection to ghost spin
             let idx = i * n + j;
             let s = self.spins[idx];
-            if !connected_to_ghost && s == ghost_spin {
-            if self.rng.gen_range(0.0..1.0) < p_ghost {
+
+            // Ghost spin coupling (field term)
+            // In flipped basis: h couples to eta(i,j) * s
+            let eta = if (i + j) % 2 == 0 { -1 } else { 1 }; 
+            if !connected_to_ghost && eta * s == ghost_spin {
+                if self.rng.gen_range(0.0..1.0) < p_ghost {
                     connected_to_ghost = true;
                 }
             }
+
+            // Neighbors
             let neighbors = [
                 ((i + 1) % n, j),
                 ((i + n - 1) % n, j),
@@ -151,7 +171,7 @@ impl Ising {
             for (ni, nj) in neighbors {
                 let nidx = ni * n + nj;
                 if !visited[nidx] && self.spins[nidx] == seed_spin {
-                if self.rng.gen_range(0.0..1.0) < p_add {
+                    if self.rng.gen_range(0.0..1.0) < p_add {
                         visited[nidx] = true;
                         queue.push_back((ni, nj));
                         cluster_sites.push((ni, nj));
@@ -165,11 +185,19 @@ impl Ising {
         for &(i, j) in &cluster_sites {
             self.spins[i * n + j] *= flip;
         }
+
+        // Flip back if antiferromagnetic
+        if self.j < 0.0 {
+            flip_sublattice(&mut self.spins, n);
+        }
+
         self.attempted += 1;
         self.accepted += 1;
         self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
         self.magnetization = calc_avg_magnetization(&self.spins, self.n);
+
     }
+
 
     // Perform a single Heat Bath update
     #[wasm_bindgen]
@@ -241,6 +269,7 @@ impl Ising {
             }
         }
     }
+
     // Get accepted spins
     #[wasm_bindgen(getter)]
     pub fn accepted(&self) -> f64 {
