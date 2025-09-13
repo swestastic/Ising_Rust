@@ -16,8 +16,88 @@ let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRati
 let plotHistory = [];
 const maxHistory = 400;
 let plotType = "energy";
+// Top-level references for temperature controls
+let tempSlider = null;
+let runSweepBtn = null;
+let sweepNWarmup = null;
+let sweepNDecor = null;
+let tempValue = null;
+// Sweep state
+
+let sweepState = null;
+let sweepRunning = false;
 
 async function run() {
+    // Sweep controls
+    const sweepTInit = document.getElementById("sweep-t-init");
+    const sweepTFinal = document.getElementById("sweep-t-final");
+    const sweepTStep = document.getElementById("sweep-t-step");
+    const sweepNSweeps = document.getElementById("sweep-n-sweeps");
+    runSweepBtn = document.getElementById("run-sweep-btn");
+    sweepNDecor = document.getElementById("sweep-n-decor");
+    sweepNWarmup = document.getElementById("sweep-n-warmup");
+
+    runSweepBtn.addEventListener("click", () => {
+        if (sweepRunning) {
+            // Stop sweep
+            sweepRunning = false;
+            if (sweepState) sweepState.active = false;
+            runSweepBtn.textContent = "Run T Sweep";
+            runSweepBtn.disabled = false;
+            return;
+        }
+        let tInit = parseFloat(sweepTInit.value);
+        let tFinal = parseFloat(sweepTFinal.value);
+        let tStep = parseFloat(sweepTStep.value);
+        let nSweeps = parseInt(sweepNSweeps.value);
+        let nDecor = parseInt(sweepNDecor.value);
+        let nWarmup = parseInt(sweepNWarmup.value);
+        if (isNaN(tInit) || isNaN(tFinal) || isNaN(tStep) || isNaN(nSweeps) || nSweeps < 1) {
+            alert("Invalid sweep parameters.");
+            return;
+        }
+        let tVals = [];
+        if (tStep === 0) return;
+        if ((tStep > 0 && tInit > tFinal) || (tStep < 0 && tInit < tFinal)) {
+            alert("Step direction does not match range.");
+            return;
+        }
+        let t = tInit;
+        if (tStep > 0) {
+            while (t <= tFinal) {
+                tVals.push(Number(t.toFixed(6)));
+                t += tStep;
+            }
+            if (tVals[tVals.length - 1] < tFinal) {
+                tVals.push(Number(tFinal.toFixed(6)));
+            }
+        } else {
+            while (t >= tFinal) {
+                tVals.push(Number(t.toFixed(6)));
+                t += tStep;
+            }
+            if (tVals[tVals.length - 1] > tFinal) {
+                tVals.push(Number(tFinal.toFixed(6)));
+            }
+        }
+        sweepState = {
+            active: true,
+            tVals,
+            tIndex: 0,
+            nSweeps,
+            nDecor,
+            nWarmup,
+            sweepCount: 0,
+            decorCount: 0,
+            warmupCount: 0,
+            batchSize: sweepsPerFrame, // sweeps per frame from slider
+            results: [],
+            phase: "warmup" // "warmup", "decor", "meas"
+        };
+        sweepRunning = true;
+        runSweepBtn.textContent = "Stop T Sweep";
+        runSweepBtn.disabled = false;
+    });
     // Slider for external field h
     const hSlider = document.getElementById("h-slider");
     const hValue = document.getElementById("h-value");
@@ -58,8 +138,8 @@ async function run() {
     setupIsing(n);
 
     // Slider for temperature
-    const tempSlider = document.getElementById("temp-slider");
-    const tempValue = document.getElementById("temp-value");
+    tempSlider = document.getElementById("temp-slider");
+    tempValue = document.getElementById("temp-value");
     tempSlider.addEventListener("input", () => {
         temp = parseFloat(tempSlider.value);
         tempValue.value = temp.toFixed(2);
@@ -124,6 +204,9 @@ async function run() {
     skipSlider.addEventListener("input", () => {
         sweepsPerFrame = parseInt(skipSlider.value);
         skipValue.textContent = sweepsPerFrame;
+        if (sweepState && sweepState.active) {
+            sweepState.batchSize = sweepsPerFrame;
+        }
     });
     skipValue.textContent = sweepsPerFrame;
 
@@ -184,26 +267,131 @@ let timeHistory = [];
 function render() {
     // No scaling needed for square aspect ratio, use default transform
     livePlotCtx.setTransform(1, 0, 0, 1, 0, 0);
-    for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
-        if (algorithm === "metropolis") {
-            ising.metropolis_step();
-        } else if (algorithm === "wolff") {
-            ising.wolff_step();
-        } else if (algorithm === "swendsen-wang") {
-            ising.swendsen_wang_step();
-        } else if (algorithm === "heat-bath") {
-            ising.heatbath_step();
-        } else if (algorithm === "glauber") {
-            ising.glauber_step();
-        } else if (algorithm === "kawasaki") {
-            ising.kawasaki_step();
+    // Track actual sweeps performed this frame
+    let sweepsThisFrame = 0;
+    // If a sweep is active, run it in sync with animation frames
+    if (sweepState && sweepState.active) {
+        // If finished with all temps, end sweep
+    if (sweepState.tIndex >= sweepState.tVals.length) {
+            sweepState.active = false;
+            sweepRunning = false;
+            runSweepBtn.textContent = "Run T Sweep";
+            runSweepBtn.disabled = false;
+            console.log("Sweep results:", sweepState.results);
+            alert("Sweep complete! See console for results.");
+            sweepState = null;
+        } else {
+            // Set temp for this step
+            let t = sweepState.tVals[sweepState.tIndex];
+            ising.set_temp(t);
+            temp = t;
+            tempSlider.value = t;
+            tempValue.value = t.toFixed(2);
+            if (sweepState.phase === "warmup") {
+                // Run warmup sweeps
+                let batch = Math.min(sweepState.batchSize, sweepState.nWarmup - sweepState.warmupCount);
+                for (let s = 0; s < batch; s++) {
+                    if (algorithm === "metropolis") {
+                        ising.metropolis_step();
+                    } else if (algorithm === "wolff") {
+                        ising.wolff_step();
+                    } else if (algorithm === "swendsen-wang") {
+                        ising.swendsen_wang_step();
+                    } else if (algorithm === "heat-bath") {
+                        ising.heatbath_step();
+                    } else if (algorithm === "glauber") {
+                        ising.glauber_step();
+                    } else if (algorithm === "kawasaki") {
+                        ising.kawasaki_step();
+                    }
+                }
+                sweepsThisFrame += batch;
+                sweepState.warmupCount += batch;
+                if (sweepState.warmupCount >= sweepState.nWarmup) {
+                    sweepState.phase = "decor";
+                    sweepState.warmupCount = 0;
+                }
+            } else if (sweepState.phase === "decor") {
+                // Run decorrelation sweeps
+                let batch = Math.min(sweepState.batchSize, sweepState.nDecor - sweepState.decorCount);
+                for (let s = 0; s < batch; s++) {
+                    if (algorithm === "metropolis") {
+                        ising.metropolis_step();
+                    } else if (algorithm === "wolff") {
+                        ising.wolff_step();
+                    } else if (algorithm === "swendsen-wang") {
+                        ising.swendsen_wang_step();
+                    } else if (algorithm === "heat-bath") {
+                        ising.heatbath_step();
+                    } else if (algorithm === "glauber") {
+                        ising.glauber_step();
+                    } else if (algorithm === "kawasaki") {
+                        ising.kawasaki_step();
+                    }
+                }
+                sweepsThisFrame += batch;
+                sweepState.decorCount += batch;
+                if (sweepState.decorCount >= sweepState.nDecor) {
+                    sweepState.phase = "meas";
+                    sweepState.decorCount = 0;
+                }
+            } else {
+                // Run measurement sweeps
+                let batch = Math.min(sweepState.batchSize, sweepState.nSweeps - sweepState.sweepCount);
+                for (let s = 0; s < batch; s++) {
+                    if (algorithm === "metropolis") {
+                        ising.metropolis_step();
+                    } else if (algorithm === "wolff") {
+                        ising.wolff_step();
+                    } else if (algorithm === "swendsen-wang") {
+                        ising.swendsen_wang_step();
+                    } else if (algorithm === "heat-bath") {
+                        ising.heatbath_step();
+                    } else if (algorithm === "glauber") {
+                        ising.glauber_step();
+                    } else if (algorithm === "kawasaki") {
+                        ising.kawasaki_step();
+                    }
+                }
+                sweepsThisFrame += batch;
+                sweepState.sweepCount += batch;
+                // If finished sweeps for this temp, record and move to next
+                if (sweepState.sweepCount >= sweepState.nSweeps) {
+                    sweepState.results.push({
+                        temp: t,
+                        energy: ising.energy,
+                        magnetization: ising.magnetization,
+                        acceptance: ising.accepted / ising.attempted
+                    });
+                    sweepState.tIndex++;
+                    sweepState.sweepCount = 0;
+                    sweepState.phase = "warmup";
+                }
+            }
         }
+    } else {
+        for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
+            if (algorithm === "metropolis") {
+                ising.metropolis_step();
+            } else if (algorithm === "wolff") {
+                ising.wolff_step();
+            } else if (algorithm === "swendsen-wang") {
+                ising.swendsen_wang_step();
+            } else if (algorithm === "heat-bath") {
+                ising.heatbath_step();
+            } else if (algorithm === "glauber") {
+                ising.glauber_step();
+            } else if (algorithm === "kawasaki") {
+                ising.kawasaki_step();
+            }
+        }
+        sweepsThisFrame += sweepsPerFrame;
     }
 
     // Calculate sweeps per second
     const now = performance.now();
     if (!render.sweepCount) render.sweepCount = 0;
-    render.sweepCount += sweepsPerFrame;
+    render.sweepCount += sweepsThisFrame;
     sweepsHistory.push(render.sweepCount);
     timeHistory.push(now);
     // Keep only last 30 seconds of history
