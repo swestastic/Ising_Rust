@@ -34,6 +34,16 @@ fn neighbor_sum(spins: &[i8], n: usize, i: usize, j: usize) -> i8 {
     up + down + left + right
 }
 
+fn pick_random_neighbor(n: usize, i: usize, j: usize, rng: &mut SmallRng) -> (usize, usize) {
+    let direction = rng.gen_range(0..4);
+    match direction {
+        0 => ((i + n - 1) % n, j), // up
+        1 => ((i + 1) % n, j),     // down
+        2 => (i, (j + n - 1) % n), // left
+        _ => (i, (j + 1) % n),     // right
+    }
+}
+
 #[wasm_bindgen]
 pub struct Ising {
     n: usize,
@@ -182,7 +192,7 @@ impl Ising {
 
             // Sum over neighbors
             let sum = neighbor_sum(&self.spins, self.n, i, j);
-            
+
             // Local field
             let local_field = self.j * sum as f64 + self.h;
             // Probability for spin up (+1)
@@ -201,6 +211,61 @@ impl Ising {
         }
         self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
         self.magnetization = calc_avg_magnetization(&self.spins, self.n);
+    }
+
+    #[wasm_bindgen]
+    pub fn kawasaki_step(&mut self) {
+        self.attempted += self.n * self.n;
+        for _ in 0..self.n * self.n {
+            let i1 = self.rng.gen_range(0..self.n);
+            let j1 = self.rng.gen_range(0..self.n);
+            let idx1 = i1 * self.n + j1;
+
+            // Pick a random neighbor
+            let (i2, j2) = pick_random_neighbor(self.n, i1, j1, &mut self.rng);
+            let idx2 = i2 * self.n + j2;
+
+            let s1 = self.spins[idx1];
+            let s2 = self.spins[idx2];
+
+            if s1 != s2 {
+                // Only consider bonds to neighbors (excluding each other)
+                let mut delta_e = 0.0;
+                let neighbors1 = [
+                    ((i1 + 1) % self.n, j1),
+                    ((i1 + self.n - 1) % self.n, j1),
+                    (i1, (j1 + 1) % self.n),
+                    (i1, (j1 + self.n - 1) % self.n),
+                ];
+                let neighbors2 = [
+                    ((i2 + 1) % self.n, j2),
+                    ((i2 + self.n - 1) % self.n, j2),
+                    (i2, (j2 + 1) % self.n),
+                    (i2, (j2 + self.n - 1) % self.n),
+                ];
+                // For site 1
+                for &(ni, nj) in &neighbors1 {
+                    let nidx = ni * self.n + nj;
+                    if nidx == idx2 { continue; } // skip swapped neighbor
+                    delta_e += 2.0 * self.j * (s1 as f64 - s2 as f64) * self.spins[nidx] as f64;
+                }
+                // For site 2
+                for &(ni, nj) in &neighbors2 {
+                    let nidx = ni * self.n + nj;
+                    if nidx == idx1 { continue; }
+                    delta_e += 2.0 * self.j * (s2 as f64 - s1 as f64) * self.spins[nidx] as f64;
+                }
+                // Field term
+                delta_e += 2.0 * self.h * (s1 as f64 - s2 as f64);
+                // Metropolis criterion
+                if delta_e <= 0.0 || self.rng.gen_range(0.0..1.0) < (-delta_e / self.temp).exp() {
+                    self.spins.swap(idx1, idx2);
+                    self.accepted += 1;
+                    // self.energy += delta_e / (self.n * self.n) as f64;
+                    self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+                }
+            }
+        }
     }
 
     // Get accepted spins

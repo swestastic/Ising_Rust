@@ -89,6 +89,9 @@ export class Ising {
     heatbath_step() {
         wasm.ising_heatbath_step(this.__wbg_ptr);
     }
+    kawasaki_step() {
+        wasm.ising_kawasaki_step(this.__wbg_ptr);
+    }
     /**
      * @returns {number}
      */

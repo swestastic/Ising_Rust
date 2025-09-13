@@ -7,6 +7,7 @@ export class Ising {
   glauber_step(): void;
   wolff_step(): void;
   heatbath_step(): void;
+  kawasaki_step(): void;
   set_temp(temp: number): void;
   set_j(j: number): void;
   set_h(h: number): void;
@@ -28,6 +29,7 @@ export interface InitOutput {
   readonly ising_glauber_step: (a: number) => void;
   readonly ising_wolff_step: (a: number) => void;
   readonly ising_heatbath_step: (a: number) => void;
+  readonly ising_kawasaki_step: (a: number) => void;
   readonly ising_accepted: (a: number) => number;
   readonly ising_attempted: (a: number) => number;
   readonly ising_energy: (a: number) => number;
