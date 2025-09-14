@@ -60,8 +60,11 @@
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center; margin-bottom: 16px;">
         <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
-          <label style="color: white;">Sweeps per frame <span id="skip-value">1</span></label>
-          <input type="range" id="skip-slider" min="1" max="20" step="1" value="1" style="width: 100%;">
+          <label style="color: white;">Sweeps per frame</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="range" id="skip-slider" min="1" max="100" step="1" value="1" style="width: 100%;">
+            <input type="number" id="skip-input" min="1" max="100" step="1" value="1" style="width: 60px; margin-left: 8px; font-size: 1.1em;">
+          </div>
         </div>
         <div style="display: flex; flex-direction: row; gap: 12px; align-items: center; margin-top: 8px;">
           <button id="reset-btn" style="padding: 8px 20px; font-size: 1.1em; border-radius: 8px; margin-right: 8px;">Reset</button>
@@ -157,24 +160,8 @@
           <li>Better axes and higher resolution for plots</li>
           <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
           <li>Update E and M based on local changes (Wolff, HeatBath)</li>
-          <li>Add runs over specific temp values and save data</li>
         </ul>
       </div>
-      <!-- <div style="background: rgba(34,34,34,0.9); color: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px #000;">
-        <h3 style="margin-top: 0; margin-bottom: 8px;">Currently Working</h3>
-        <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
-          <li>All aspects of Metropolis algorithm</li>
-          <li>All aspects of Wolff algorithm (h!=0 is slow)</li>
-          <li>All aspects of Glauber dynamics</li>
-          <li>Live image updates</li>
-          <li>Live plot updates</li>
-          <li>Plot selection dropdown</li>
-          <li>Instantaneous E and M values</li>
-          <li>Sweeps/second value</li>
-          <li>Reset button</li>
-          <li>Plot disable option</li>
-        </ul>
-      </div> -->
     </div>
   </div>
   </body>

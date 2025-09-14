@@ -36,9 +36,9 @@ async function run() {
 
     downloadCsvBtn.addEventListener("click", () => {
         if (!sweepState || !sweepState.results || sweepState.results.length === 0) return;
-        let csv = "T,Energy,Energy_SEM,Magnetization,Magnetization_SEM,Acceptance,Acceptance_SEM\n";
+        let csv = "T,Energy,Energy_SEM,Magnetization,Magnetization_SEM,Acceptance,Acceptance_SEM,Energy2,Energy2_SEM,Magnetization2,Magnetization2_SEM,SpecificHeat,MagneticSusceptibility\n";
         for (const row of sweepState.results) {
-            csv += `${row.temp},${row.energy},${row.energy_sem},${row.magnetization},${row.magnetization_sem},${row.acceptance},${row.acceptance_sem}\n`;
+            csv += `${row.temp},${row.energy},${row.energy_sem},${row.magnetization},${row.magnetization_sem},${row.acceptance},${row.acceptance_sem},${row.energy2},${row.energy2_sem},${row.magnetization2},${row.magnetization2_sem},${row.specific_heat},${row.susceptibility}\n`;
         }
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -120,7 +120,7 @@ async function run() {
             results: [],
             phase: "warmup", // "warmup", "decor", "meas"
             // Store all measurement values for binning
-            binData: tVals.map(() => ({ energy: [], magnetization: [], acceptance: [] }))
+            binData: tVals.map(() => ({ energy: [], magnetization: [], acceptance: [], energy2: [], magnetization2: [] }))
         };
         sweepRunning = true;
         runSweepBtn.textContent = "Stop T Sweep";
@@ -228,15 +228,27 @@ async function run() {
 
     // Sweeps per frame slider
     const skipSlider = document.getElementById("skip-slider");
-    const skipValue = document.getElementById("skip-value");
+    const skipInput = document.getElementById("skip-input");
     skipSlider.addEventListener("input", () => {
         sweepsPerFrame = parseInt(skipSlider.value);
-        skipValue.textContent = sweepsPerFrame;
+        skipInput.value = sweepsPerFrame;
         if (sweepState && sweepState.active) {
             sweepState.batchSize = sweepsPerFrame;
         }
     });
-    skipValue.textContent = sweepsPerFrame;
+    skipInput.addEventListener("change", () => {
+        let val = parseInt(skipInput.value);
+        if (isNaN(val) || val < parseInt(skipSlider.min) || val > parseInt(skipSlider.max)) {
+            skipInput.value = sweepsPerFrame;
+            return;
+        }
+        sweepsPerFrame = val;
+        skipSlider.value = val;
+        if (sweepState && sweepState.active) {
+            sweepState.batchSize = sweepsPerFrame;
+        }
+    });
+    skipInput.value = sweepsPerFrame;
 
     // Reset button logic
     const resetBtn = document.getElementById("reset-btn");
@@ -389,6 +401,8 @@ function render() {
                     sweepState.binData[idx].energy.push(ising.energy);
                     sweepState.binData[idx].magnetization.push(ising.magnetization);
                     sweepState.binData[idx].acceptance.push(ising.accepted / ising.attempted);
+                    sweepState.binData[idx].energy2.push(ising.energy * ising.energy);
+                    sweepState.binData[idx].magnetization2.push(ising.magnetization * ising.magnetization);
                 }
                 sweepsThisFrame += batch;
                 sweepState.sweepCount += batch;
@@ -414,6 +428,13 @@ function render() {
                     const eStats = binStats(sweepState.binData[idx].energy);
                     const mStats = binStats(sweepState.binData[idx].magnetization);
                     const aStats = binStats(sweepState.binData[idx].acceptance);
+                    const e2Stats = binStats(sweepState.binData[idx].energy2);
+                    const m2Stats = binStats(sweepState.binData[idx].magnetization2);
+                    // Specific heat per site: C = (⟨E²⟩ - ⟨E⟩²) / (T²)
+                    const tempVal = t;
+                    const specificHeat = (e2Stats.mean - eStats.mean * eStats.mean) / (tempVal * tempVal);
+                    // Magnetic susceptibility per site: χ = (⟨M²⟩ - ⟨M⟩²) / T
+                    const susceptibility = (m2Stats.mean - mStats.mean * mStats.mean) / tempVal;
                     sweepState.results.push({
                         temp: t,
                         energy: eStats.mean,
@@ -421,7 +442,13 @@ function render() {
                         magnetization: mStats.mean,
                         magnetization_sem: mStats.sem,
                         acceptance: aStats.mean,
-                        acceptance_sem: aStats.sem
+                        acceptance_sem: aStats.sem,
+                        energy2: e2Stats.mean,
+                        energy2_sem: e2Stats.sem,
+                        magnetization2: m2Stats.mean,
+                        magnetization2_sem: m2Stats.sem,
+                        specific_heat: specificHeat,
+                        susceptibility: susceptibility
                     });
                     sweepState.tIndex++;
                     sweepState.sweepCount = 0;
