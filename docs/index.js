@@ -22,12 +22,37 @@ let runSweepBtn = null;
 let sweepNWarmup = null;
 let sweepNDecor = null;
 let tempValue = null;
+let downloadCsvBtn = null;
 // Sweep state
 
 let sweepState = null;
 let sweepRunning = false;
 
 async function run() {
+    downloadCsvBtn = document.getElementById("download-csv-btn");
+    downloadCsvBtn.disabled = true;
+    downloadCsvBtn.style.background = "#444";
+    downloadCsvBtn.style.color = "#ccc";
+    downloadCsvBtn.style.cursor = "not-allowed";
+
+    downloadCsvBtn.addEventListener("click", () => {
+        if (!sweepState || !sweepState.results || sweepState.results.length === 0) return;
+        let csv = "T,Energy,Magnetization,Acceptance\n";
+        for (const row of sweepState.results) {
+            csv += `${row.temp},${row.energy},${row.magnetization},${row.acceptance}\n`;
+        }
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ising_sweep_results.csv";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    });
     // Sweep controls
     const sweepTInit = document.getElementById("sweep-t-init");
     const sweepTFinal = document.getElementById("sweep-t-final");
@@ -272,14 +297,18 @@ function render() {
     // If a sweep is active, run it in sync with animation frames
     if (sweepState && sweepState.active) {
         // If finished with all temps, end sweep
-    if (sweepState.tIndex >= sweepState.tVals.length) {
+        if (sweepState.tIndex >= sweepState.tVals.length) {
             sweepState.active = false;
             sweepRunning = false;
             runSweepBtn.textContent = "Run T Sweep";
             runSweepBtn.disabled = false;
+            // Enable CSV download button
+            downloadCsvBtn.disabled = false;
+            downloadCsvBtn.style.background = "#2a7";
+            downloadCsvBtn.style.color = "#fff";
+            downloadCsvBtn.style.cursor = "pointer";
             console.log("Sweep results:", sweepState.results);
             alert("Sweep complete! See console for results.");
-            sweepState = null;
         } else {
             // Set temp for this step
             let t = sweepState.tVals[sweepState.tIndex];
