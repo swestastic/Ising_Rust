@@ -1,4 +1,3 @@
-
 import init, { Ising } from "./pkg/ising_gui_rust.js";
 
 let wasm;
@@ -37,15 +36,17 @@ async function run() {
 
     downloadCsvBtn.addEventListener("click", () => {
         if (!sweepState || !sweepState.results || sweepState.results.length === 0) return;
-        let csv = "T,Energy,Magnetization,Acceptance\n";
+        let csv = "T,Energy,Energy_SEM,Magnetization,Magnetization_SEM,Acceptance,Acceptance_SEM\n";
         for (const row of sweepState.results) {
-            csv += `${row.temp},${row.energy},${row.magnetization},${row.acceptance}\n`;
+            csv += `${row.temp},${row.energy},${row.energy_sem},${row.magnetization},${row.magnetization_sem},${row.acceptance},${row.acceptance_sem}\n`;
         }
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
+        let algoName = algorithm;
+        if (algoName === "heat-bath") algoName = "heatbath";
         a.href = url;
-        a.download = "ising_sweep_results.csv";
+        a.download = `ising_${algoName}_results.csv`;
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
@@ -117,7 +118,9 @@ async function run() {
             warmupCount: 0,
             batchSize: sweepsPerFrame, // sweeps per frame from slider
             results: [],
-            phase: "warmup" // "warmup", "decor", "meas"
+            phase: "warmup", // "warmup", "decor", "meas"
+            // Store all measurement values for binning
+            binData: tVals.map(() => ({ energy: [], magnetization: [], acceptance: [] }))
         };
         sweepRunning = true;
         runSweepBtn.textContent = "Stop T Sweep";
@@ -381,16 +384,44 @@ function render() {
                     } else if (algorithm === "kawasaki") {
                         ising.kawasaki_step();
                     }
+                    // Store measurement values for binning
+                    const idx = sweepState.tIndex;
+                    sweepState.binData[idx].energy.push(ising.energy);
+                    sweepState.binData[idx].magnetization.push(ising.magnetization);
+                    sweepState.binData[idx].acceptance.push(ising.accepted / ising.attempted);
                 }
                 sweepsThisFrame += batch;
                 sweepState.sweepCount += batch;
                 // If finished sweeps for this temp, record and move to next
                 if (sweepState.sweepCount >= sweepState.nSweeps) {
+                    // Calculate mean and SEM using bin averages
+                    function binStats(arr, nBins = 10) {
+                        const binSize = Math.max(1, Math.floor(arr.length / nBins));
+                        const bins = [];
+                        for (let i = 0; i < arr.length; i += binSize) {
+                            const bin = arr.slice(i, i + binSize);
+                            if (bin.length > 0) {
+                                const mean = bin.reduce((a, b) => a + b, 0) / bin.length;
+                                bins.push(mean);
+                            }
+                        }
+                        const mean = bins.reduce((a, b) => a + b, 0) / bins.length;
+                        const variance = bins.reduce((a, b) => a + (b - mean) ** 2, 0) / bins.length;
+                        const sem = Math.sqrt(variance / bins.length);
+                        return { mean, sem };
+                    }
+                    const idx = sweepState.tIndex;
+                    const eStats = binStats(sweepState.binData[idx].energy);
+                    const mStats = binStats(sweepState.binData[idx].magnetization);
+                    const aStats = binStats(sweepState.binData[idx].acceptance);
                     sweepState.results.push({
                         temp: t,
-                        energy: ising.energy,
-                        magnetization: ising.magnetization,
-                        acceptance: ising.accepted / ising.attempted
+                        energy: eStats.mean,
+                        energy_sem: eStats.sem,
+                        magnetization: mStats.mean,
+                        magnetization_sem: mStats.sem,
+                        acceptance: aStats.mean,
+                        acceptance_sem: aStats.sem
                     });
                     sweepState.tIndex++;
                     sweepState.sweepCount = 0;
