@@ -8,6 +8,7 @@ export const ising_glauber_step: (a: number) => void;
 export const ising_wolff_step: (a: number) => void;
 export const ising_heatbath_step: (a: number) => void;
 export const ising_kawasaki_step: (a: number) => void;
+export const ising_swendsen_wang_step: (a: number) => void;
 export const ising_accepted: (a: number) => number;
 export const ising_attempted: (a: number) => number;
 export const ising_energy: (a: number) => number;

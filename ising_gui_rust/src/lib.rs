@@ -231,6 +231,7 @@ impl Ising {
         self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
+    // Perform a single Kawasaki update
     #[wasm_bindgen]
     pub fn kawasaki_step(&mut self) {
         self.attempted += self.n * self.n;
@@ -268,6 +269,106 @@ impl Ising {
                 self.spins.swap(idx1, idx2); // revert swap
             }
         }
+    }
+
+    // Perform a single Swendsen-Wang cluster update
+    #[wasm_bindgen]
+    pub fn swendsen_wang_step(&mut self) {
+        use std::collections::VecDeque;
+
+        let n = self.n;
+        // bond add probability uses |J|
+        let p_add = 1.0 - (-2.0 * self.j.abs() / self.temp).exp();
+        // ghost spin for field coupling (same convention as wolff)
+        let ghost_spin: i8 = if self.h >= 0.0 { 1 } else { -1 };
+        let p_ghost = 1.0 - (-2.0 * self.h.abs() / self.temp).exp();
+
+        // For AFM, flip sublattice to treat as FM for clustering
+        if self.j < 0.0 {
+            flip_sublattice(&mut self.spins, n);
+        }
+
+        let mut labels = vec![false; n * n]; // visited/labeled
+        // iterate over all sites to form clusters
+        for i0 in 0..n {
+            for j0 in 0..n {
+                let idx0 = i0 * n + j0;
+                if labels[idx0] {
+                    continue; // already assigned to a cluster
+                }
+
+                // start BFS for a new cluster
+                let seed_spin = self.spins[idx0];
+                let mut queue = VecDeque::new();
+                let mut cluster_sites: Vec<(usize, usize)> = Vec::new();
+                let mut connected_to_ghost = false;
+
+                labels[idx0] = true;
+                queue.push_back((i0, j0));
+                cluster_sites.push((i0, j0));
+
+                while let Some((i, j)) = queue.pop_front() {
+                    let idx = i * n + j;
+                    let s = self.spins[idx];
+
+                    // ghost bond possibility for this site
+                    // in flipped-basis: h couples to eta(i,j) * s
+                    let eta = if (i + j) % 2 == 0 { -1 } else { 1 };
+                    if !connected_to_ghost && eta * s == ghost_spin {
+                        if self.rng.gen_range(0.0..1.0) < p_ghost {
+                            connected_to_ghost = true;
+                        }
+                    }
+
+                    // neighbors (periodic)
+                    let neighbors = [
+                        ((i + 1) % n, j),
+                        ((i + n - 1) % n, j),
+                        (i, (j + 1) % n),
+                        (i, (j + n - 1) % n),
+                    ];
+                    for (ni, nj) in neighbors {
+                        let nidx = ni * n + nj;
+                        // only consider same-spin neighbors for bonding
+                        if !labels[nidx] && self.spins[nidx] == seed_spin {
+                            // bond with probability p_add
+                            if self.rng.gen_range(0.0..1.0) < p_add {
+                                labels[nidx] = true;
+                                queue.push_back((ni, nj));
+                                cluster_sites.push((ni, nj));
+                            }
+                        }
+                    }
+                } // finished building this cluster
+
+                // Decide whether to flip this cluster:
+                // - if connected to ghost => do not flip (frozen by field)
+                // - otherwise flip with probability 1/2
+                let do_flip = if connected_to_ghost {
+                    false
+                } else {
+                    self.rng.gen_bool(0.5)
+                };
+
+                if do_flip {
+                    for &(i, j) in &cluster_sites {
+                        let idx = i * n + j;
+                        self.spins[idx] = -self.spins[idx];
+                    }
+                }
+            }
+        }
+
+        // Restore sublattice if AFM
+        if self.j < 0.0 {
+            flip_sublattice(&mut self.spins, n);
+        }
+
+        // update bookkeeping (match wolff style)
+        self.attempted += 1;
+        self.accepted += 1;
+        self.energy = calc_avg_energy(&self.spins, self.n, self.j, self.h);
+        self.magnetization = calc_avg_magnetization(&self.spins, self.n);
     }
 
     // Get accepted spins

@@ -50,7 +50,7 @@
             <select id="algorithm" style="margin-left: 8px; font-size: 1.1em;">
               <option value="metropolis" selected>Metropolis</option>
               <option value="wolff">Wolff</option>
-              <!-- <option value="swendsen-wang">Swendsen-Wang (BROKEN) </option> -->
+              <option value="swendsen-wang">Swendsen-Wang</option>
               <option value="heat-bath">Heat Bath</option>
               <option value="glauber">Glauber</option>
               <option value="kawasaki">Kawasaki</option>
@@ -149,17 +149,14 @@
       <div style="background: rgba(34,34,34,0.9); color: white; padding: 16px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 2px 8px #000;">
         <h3 style="margin-top: 0; margin-bottom: 8px;">TODO List</h3>
         <ul style="list-style-type: disc; margin: 0; padding-left: 20px;">
-          <li>Implement Swendsen-Wang algorithm</li>
-          <li>Add export/save functionality for plots and data</li>
+          <li>External field is having some issues currently, needs fixing!</li>
           <li>Documentation/information about algorithms</li>
           <li>Improve UI/UX design</li>
-          <li>Optimize performance for larger lattices</li>
-          <li>Add more plot options (e.g. specific heat, susceptibility)</li>
           <li>Code cleanup and comments</li>
           <li>Live readout for average cluster size</li>
           <li>Better axes and higher resolution for plots</li>
           <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
-          <li>Update E and M based on local changes (Wolff, HeatBath)</li>
+          <li>Update E and M based on local changes (Heat bath only, probably not worth implementing for Wolff & SW)</li>
         </ul>
       </div>
     </div>

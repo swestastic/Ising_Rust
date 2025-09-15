@@ -92,6 +92,9 @@ export class Ising {
     kawasaki_step() {
         wasm.ising_kawasaki_step(this.__wbg_ptr);
     }
+    swendsen_wang_step() {
+        wasm.ising_swendsen_wang_step(this.__wbg_ptr);
+    }
     /**
      * @returns {number}
      */
