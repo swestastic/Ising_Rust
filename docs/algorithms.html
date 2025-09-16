@@ -177,13 +177,13 @@
             <ul>
                 <li>Randomly select a spin site (i, j)</li>
                 <li>Calculate the local field at (i, j)</li>
-                <li>Set s_ij = +1 with probability P(s_ij = +1)</li>
-                <li>If the probability check fails, set s_ij = -1</li>
+                <li>Set s = +1 with probability P(s = +1)</li>
+                <li>If the probability check fails, set s = -1</li>
             </ul>
             
             <div class="formula">
                 local_field = J·(s_up + s_down + s_left + s_right) + h
-                <br>P(s_ij = +1) = 1 / (1 + exp(-2 * local_field / T))
+                <br>P(s = +1) = 1 / (1 + exp(-2 * local_field / T))
             </div>
         </div>
 
