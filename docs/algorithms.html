@@ -117,6 +117,19 @@
         </div>
 
         <div class="algorithm-section">
+            <h2>Key Terms</h2>
+            <ul>
+                <li>J - Interaction strength between neighboring spins</li>
+                <li>h - External magnetic field strength (h > 0 favors +1 spins, h < 0 favors -1 spins)</li>
+                <li>T - Temperature of the system</li>
+                <li>s - Spin at site (i, j), either +1 or -1</li>
+                <li>s_up, s_down, s_left, s_right - Spins of the four nearest neighbors of (i, j)</li>
+                <li>ΔE - Change in energy if a spin is flipped</li>
+                <li>N² - Total number of spins in the system (e.g for N=64, the lattice is 64x64 with 4096 total sites)</li>
+            </ul>
+        </div>        
+
+        <div class="algorithm-section">
             <h2>Metropolis Algorithm</h2>
             <p>The Metropolis algorithm is a single-spin flip Monte Carlo method that follows the detailed balance condition. It's one of the most widely used algorithms for simulating the Ising model.</p>
             
@@ -171,30 +184,6 @@
             <div class="formula">
                 local_field = J·(s_up + s_down + s_left + s_right) + h
                 <br>P(s_ij = +1) = 1 / (1 + exp(-2 * local_field / T))
-            </div>
-        </div>
-
-        <div class="algorithm-section">
-            <h2>Kawasaki Dynamics</h2>
-            <p>The Kawasaki algorithm conserves the total magnetization by exchanging spins between neighboring sites rather than flipping individual spins. This is useful for studying systems with conserved quantities.</p>
-            
-            <h3>Implementation Details:</h3>
-            <ul>
-                <li>Randomly select a spin site and one of its nearest neighbors</li>
-                <li>Calculate the energy change for swapping these spins</li>
-                <li>Accept the swap with Metropolis probability</li>
-                <li>This conserves total magnetization while allowing local rearrangements</li>
-            </ul>
-            
-            <div class="formula">
-                ΔE = E_after - E_before 
-                <br>P_accept = min(1, exp(-ΔE/T))
-            </div>
-            
-            <div class="note">
-                <strong>Note for ΔE Calculation:</strong> Normally when a site is flipped, 4 bonds are affected. In Kawasaki dynamics, since we exchange two spins, 6 bonds are affected (3 for each spin, 
-                the bond connecting the two sites is left unchanged). 
-                This must be accounted for in the ΔE calculation.
             </div>
         </div>
 
@@ -265,6 +254,30 @@
                 Learn more about that here: <a href="https://arxiv.org/abs/1805.04019" style="color: #87CEEB;">Cluster representations and the Wolff algorithm in arbitrary external fields - Jaron Kent-Dobias, James P Sethna</a>
             </div>
             
+        </div>
+
+        <div class="algorithm-section">
+            <h2>Kawasaki Dynamics</h2>
+            <p>The Kawasaki algorithm conserves the total magnetization by exchanging spins between neighboring sites rather than flipping individual spins. This is useful for studying systems with conserved quantities.</p>
+            
+            <h3>Implementation Details:</h3>
+            <ul>
+                <li>Randomly select a spin site and one of its nearest neighbors</li>
+                <li>Calculate the energy change for swapping these spins</li>
+                <li>Accept the swap with Metropolis probability</li>
+                <li>This conserves total magnetization while allowing local rearrangements</li>
+            </ul>
+            
+            <div class="formula">
+                ΔE = E_after - E_before 
+                <br>P_accept = min(1, exp(-ΔE/T))
+            </div>
+            
+            <div class="note">
+                <strong>Note for ΔE Calculation:</strong> Normally when a site is flipped, 4 bonds are affected. In Kawasaki dynamics, since we exchange two spins, 6 bonds are affected (3 for each spin, 
+                the bond connecting the two sites is left unchanged). 
+                This must be accounted for in the ΔE calculation.
+            </div>
         </div>
 
         <div class="algorithm-section">
