@@ -195,24 +195,27 @@
             
             <h3>Implementation Details:</h3>
             <ul>
-                <li>Coming soon!</li>
-                <!-- <li>Randomly select a spin site</li>
-                <li>Add aligned neighbors to the cluster with probability P = 1 - exp(-2|J|/T)</li>
-                <li>Use breadth-first search to grow the cluster</li>
-                <li>Flip the entire cluster (or align with external field)</li>
-                <li>Handle antiferromagnetic case with sublattice transformation</li> -->
+                <li>If J&lt;0.0, perform a checkerboard gauge transformation</li>
+                <li>Randomly select a spin site (i, j)</li>
+                <li>Check if the site will be coupled to the ghost spin with probability P = 1 - exp(-2|h|/T)</li>
+                <li>Add aligned neighboring sites to the cluster with probability P = 1 - exp(-2|J|/T)</li>
+                <li>Set (i, j) to the coordinates of a neighbor that was added to the cluster</li>
+                <li>Repeat steps 3-5 until every site in the cluster has been checked, and the cluster stops growing. Each bond should be checked once.</li>
+                <li>If any of the sites in the cluster were coupled to the ghost spin, set all sites in the cluster to align with it.</li>
+                <li>If no sites in the cluster were coupled to the ghost spin, flip all sites in the cluster.</li>
+                <li>If J&lt;0, undo the checkerboard gauge transformation.</li>
             </ul>
 
             <div class="formula">
-                Coming soon!
-                <!-- P_add = 1 - exp(-2|J|/T)  (bond probability)
-                <br>P_ghost = 1 - exp(-2|h|/T)  (external field coupling) -->
+                P_add = 1 - exp(-2|J|/T)  (add a site to the cluster)
+                <br>P_ghost = 1 - exp(-2|h|/T)  (couple a site to the ghost spin)
+                <br>ghost_spin = 1 if h>=0 else -1
             </div>
             <div class="note">
                 <strong>Note for Antiferromagnetism:</strong> This algorithm does not work out of the box for antiferromagnetic interactions (J&lt;0).
                 In order to handle this, we perform a gauge transformation by flipping one color of the checkerboard lattice before applying the Wolff algorithm.
                 This effectively converts the antiferromagnetic problem into a ferromagnetic one, allowing the cluster algorithm to function correctly.
-                At the end of every sweep, we flip the sublattice back to restore the original configuration.
+                At the end of every sweep, we flip the sublattice back to restore the original configuration. <a href="checkerboard.html" style="color: #87CEEB;">Learn more about checkerboard transformations here</a>.
             </div>
             <div class="note">
                 <strong>Note for External Field:</strong> In order to include the effect of an external magnetic field, we introduce a "ghost" spin that interacts with all spins in the lattice.
@@ -247,7 +250,7 @@
                 <strong>Note for Antiferromagnetism:</strong> This algorithm does not work out of the box for antiferromagnetic interactions (J&lt;0).
                 In order to handle this, we perform a gauge transformation by flipping one color of the checkerboard lattice before applying the Wolff algorithm.
                 This effectively converts the antiferromagnetic problem into a ferromagnetic one, allowing the cluster algorithm to function correctly.
-                At the end of every sweep, we flip the sublattice back to restore the original configuration.
+                At the end of every sweep, we flip the sublattice back to restore the original configuration. <a href="checkerboard.html" style="color: #87CEEB;">Learn more about checkerboard transformations here</a>.
             </div>
            <div class="note">
                 <strong>Note for External Field:</strong> In order to include the effect of an external magnetic field, we introduce a "ghost" spin that interacts with all spins in the lattice.

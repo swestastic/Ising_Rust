@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkerboard Lattice Gauge Transformations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #222;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 16px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .back-link {
+            display: inline-block;
+            background: #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .back-link:hover {
+            background: #444;
+            transform: translateY(-2px);
+        }
+        .section {
+            background: #222a;
+            margin: 24px 0;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px #000;
+        }
+        h2 {
+            color: #87CEEB;
+            font-size: 1.5em;
+            margin-bottom: 18px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #ADD8E6;
+            font-size: 1.15em;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        .formula {
+            background: #111;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 12px 0;
+            border-left: 4px solid #87CEEB;
+        }
+        ul {
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .note {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #FFC107;
+            padding: 12px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .example {
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 4px solid #ADD8E6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">← Back to Simulation</a>
+            <h1>Checkerboard Lattice Gauge Transformations</h1>
+            <p>Understanding sublattice transformations and their role in the Ising model</p>
+        </div>
+
+        <div class="section">
+            <h2>What is a Checkerboard Lattice?</h2>
+            <p>The checkerboard lattice is a way of visualizing the 2D square lattice as two interleaved sublattices, often called "even" and "odd" sites. 
+                This is useful for certain transformations and algorithms, especially in the context of antiferromagnetic interactions and cluster updates. 
+                Note that we use this on a bipartite lattice, such as the square lattice with an even number of sites per side.</p>
+            <div class="example">
+                For a site (i, j):<br>
+                - Even sublattice: (i + j) % 2 == 0<br>
+                - Odd sublattice: (i + j) % 2 == 1
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Gauge Transformations in the Ising Model</h2>
+            <p>Gauge transformations are changes of variables that leave the physical properties of the system invariant. In the Ising model, a common transformation is to flip all spins on one sublattice, which can map an antiferromagnetic system to a ferromagnetic one.</p>
+            <div class="formula">
+                s'_{i,j} = η_{i,j} · s_{i,j},<br>
+                where η_{i,j} = (-1)^{i+j}
+            </div>
+            <p>This transformation is especially useful for cluster algorithms, allowing them to treat antiferromagnetic couplings as ferromagnetic by flipping the sign of the interaction on one sublattice.</p>
+        </div>
+
+    </div>
+</body>
+</html>
