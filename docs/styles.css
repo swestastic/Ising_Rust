@@ -21,3 +21,15 @@ body{
   color:var(--text);
   font-family:var(--sans);
 }
+
+.main-content{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:32px;
+  }
+
+canvas{
+    image-rendering:pixelated;
+    border:2px solid white;
+  }
