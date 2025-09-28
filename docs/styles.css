@@ -45,6 +45,21 @@ body{
     margin:0 0 16px 0;
   }
 
+  .controls-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    align-items:center;
+    margin-bottom:16px;
+  }
+
+  .field-col{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:180px;
+  }
+
 .main-content{
     display:flex;
     flex-direction:column;
