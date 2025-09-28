@@ -73,3 +73,8 @@ canvas{
     image-rendering:pixelated;
     border:2px solid white;
   }
+
+  @media (max-width: 980px){
+    .stage{ flex-direction:column; gap:20px; }
+    .plot-canvas, .sim-canvas{ width:100%; max-width:420px; height:400px; }
+  }
