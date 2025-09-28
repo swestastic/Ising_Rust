@@ -69,6 +69,15 @@ body{
 
   .label{ color:var(--text); font-size:1em; }
 
+  .todo-col{
+    flex:1;
+    min-width:220px;
+  }
+
+  .todo.panel{
+    background:rgba(34,34,34,0.9); /* any element that has both classes todo and panel */
+  }
+
 canvas{
     image-rendering:pixelated;
     border:2px solid white;
