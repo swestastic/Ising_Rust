@@ -74,6 +74,13 @@ canvas{
     border:2px solid white;
   }
 
+  .readout{
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:1.1em;
+    margin-top:4px;
+  }
+
   @media (max-width: 980px){
     .stage{ flex-direction:column; gap:20px; }
     .plot-canvas, .sim-canvas{ width:100%; max-width:420px; height:400px; }
