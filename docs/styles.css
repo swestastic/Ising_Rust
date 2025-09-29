@@ -78,14 +78,26 @@ body{
     background:rgba(34,34,34,0.9); /* any element that has both classes todo and panel */
   }
 
+  .info.panel{
+    background:rgba(34,34,34,0.95);
+  }
+
 canvas{
     image-rendering:pixelated;
     border:2px solid white;
   }
 
+  h2{
+    margin-top: 0;
+  }
+
   h3{
     margin-top: 0;
     margin-bottom: 8px;
+  }
+
+  .prose{
+    font-size:1.1em;
   }
 
   .readout{
