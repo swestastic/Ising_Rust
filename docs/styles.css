@@ -69,6 +69,24 @@ body{
 
   .label{ color:var(--text); font-size:1em; }
 
+  .bottom{
+    display:flex;
+    flex-direction:row;
+    justify-content:center;
+    align-items:flex-start;
+    gap:32px;
+    width:100%;
+    margin:48px auto 24px auto;
+  }
+
+  .about-col{
+    flex:2;
+    min-width:300px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+  }
+
   .todo-col{
     flex:1;
     min-width:220px;
@@ -80,6 +98,7 @@ body{
 
   .info.panel{
     background:rgba(34,34,34,0.95);
+    padding: 24px;
   }
 
 canvas{
