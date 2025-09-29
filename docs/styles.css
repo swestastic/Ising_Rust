@@ -180,6 +180,28 @@ canvas{
     padding-left:20px;
   }
 
+  .btn{
+    padding:8px 20px;
+    font-size:1.1em;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#2d2d2d;
+    color:#f3f3f3;
+    cursor:pointer;
+  }
+
+.btn:hover{ background:#373737; }
+.btn:disabled,
+.btn[disabled]{
+  background:#444;
+  color:#ccc;
+  cursor:not-allowed;
+}
+.btn.btn-muted{
+  background:#444;
+  color:#ccc;
+}
+
   .readout{
     color:var(--text);
     font-family:var(--mono);
