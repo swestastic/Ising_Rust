@@ -164,6 +164,16 @@ canvas{
     font-size:1.1em;
   }
 
+  .stage{
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    gap:32px;
+    margin-top:24px;
+    justify-content:center;
+    width:100%;
+  }
+
   .prose ul{
     list-style:disc;
     margin:0;
