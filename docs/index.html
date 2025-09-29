@@ -85,16 +85,18 @@
       <canvas id="canvas"></canvas>
       <div style="display: flex; flex-direction: column; align-items: center;">
         <canvas id="live-plot" width="400" height="400" style="width: 400px; height: 400px; background: #111; border: 2px solid white; border-radius: 12px; box-shadow: 0 2px 8px #000;"></canvas>
-        <div style="display: flex; flex-direction: column; align-items: center; margin-top: 12px;">
-          <label id="plot-label" style="color: white; margin-bottom: 8px; font-size: 1.1em;">
+        
+        <div class="plot-controls">
+          <label id="plot-label" class="label dropdown">
             Plot:
-            <select id="plot-type" style="margin-left: 8px; font-size: 1.1em;">
+            <select id="plot-type" class="select">
               <option value="energy" selected>Energy per Site</option>
               <option value="magnetization">Magnetization per Site</option>
               <option value="acceptance_ratio">Acceptance Ratio</option>
               <option value="no_plot">None (Disable Plot)</option>
             </select>
           </label>
+
           <span class="readout">E = <span id="energy-value">0.0000</span> &nbsp; M = <span id="magnetization-value">+0.0000</span></span>
           <span class="readout">Acceptance Ratio: <span id="acceptance-ratio">0</span></span>
           <span class="readout">Sweeps/sec: <span id="sweeps-per-sec">0</span></span>
