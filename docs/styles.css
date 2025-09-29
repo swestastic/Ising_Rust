@@ -202,6 +202,18 @@ canvas{
   color:#ccc;
 }
 
+.panel.sweep-panel{
+  background: #222a; 
+  border-radius: 16px; 
+  padding: 24px 32px;
+  margin-bottom: 24px; 
+  box-shadow: 0 2px 8px #000;
+  max-width: 900px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
   .readout{
     color:var(--text);
     font-family:var(--mono);

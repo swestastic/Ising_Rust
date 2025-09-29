@@ -68,9 +68,10 @@
         </div>
       </div>
     </div>
-  <div class="sweep-panel" style="background: #222a; border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; box-shadow: 0 2px 8px #000; max-width: 900px; width: 100%; margin-left: auto; margin-right: auto;">
-      <h2 style="color: #fff; font-size: 1.3em; margin-bottom: 16px;">Sweep Controls</h2>
-      <div id="sweep-controls" style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
+  
+    <div class="sweep-panel panel">
+      <h2 class="panel-title">Sweep Controls</h2>
+      <div id="sweep-controls" class="controls-row">
         <label class="label">T<sub>init</sub>: <input type="number" id="sweep-t-init" min="0.1" max="5.0" step="0.01" value="2.5" style="width: 80px; font-size: 1.1em;"></label>
         <label class="label">T<sub>final</sub>: <input type="number" id="sweep-t-final" min="0.1" max="5.0" step="0.01" value="1.5" style="width: 80px; font-size: 1.1em;"></label>
         <label class="label">ΔT: <input type="number" id="sweep-t-step" min="0.01" max="1.0" step="0.01" value="-0.1" style="width: 80px; font-size: 1.1em;"></label>
