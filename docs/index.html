@@ -81,10 +81,12 @@
   <button id="download-csv-btn" style="padding: 8px 20px; font-size: 1.1em; border-radius: 8px; background: #444; color: #ccc; cursor: not-allowed;" disabled>Download CSV</button>
       </div>
     </div>
-  <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 32px; margin-top: 24px; justify-content: center; width: 100%;">
-      <canvas id="canvas"></canvas>
+  
+    <div style="display: flex; flex-direction: row; align-items: flex-start; gap: 32px; margin-top: 24px; justify-content: center; width: 100%;">
+      <canvas id="canvas" class="sim-canvas"></canvas>
+      
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="live-plot" width="400" height="400" style="width: 400px; height: 400px; background: #111; border: 2px solid white; border-radius: 12px; box-shadow: 0 2px 8px #000;"></canvas>
+        <canvas id="live-plot" width="400" height="400" class="plot-canvas"></canvas>
         
         <div class="plot-controls">
           <label id="plot-label" class="label dropdown">
