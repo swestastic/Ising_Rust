@@ -7,30 +7,34 @@
   </head>
   <body>
     <div class="main-content container">
-      <div class="controls-panel panel" style="background: #222a; border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; box-shadow: 0 2px 8px #000; max-width: 900px; width: 100%; margin-left: auto; margin-right: auto;">
-      <h2 class="panel-title" style="color: #fff; font-size: 1.3em; margin-bottom: 16px;">Simulation Controls</h2>
-      <div class="controls-row" style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center; margin-bottom: 16px;">
-        <div class="field-col" style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+      <div class="controls-panel panel">
+      <h2 class="panel-title">Simulation Controls</h2>
+      
+      <div class="controls-row">
+        <div class="field-col">
           <label class="label">Temperature
-            <input type="number" id="temp-value" min="0.1" max="5.0" step="0.01" value="2.27" style="width: 80px; margin-left: 8px; font-size: 1.1em;">
+            <input type="number" id="temp-value" min="0.1" max="5.0" step="0.01" value="2.27" class="num">
           </label>
-          <input type="range" id="temp-slider" min="0.1" max="5.0" step="0.01" value="2.27" style="width: 100%;">
+          <input type="range" id="temp-slider" min="0.1" max="5.0" step="0.01" value="2.27" class="range">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+        
+        <div class="field-col">
           <label class="label">Coupling J
-            <input type="number" id="j-value" min="-2.0" max="2.0" step="0.01" value="1.0" style="width: 80px; margin-left: 8px; font-size: 1.1em;">
+            <input type="number" id="j-value" min="-2.0" max="2.0" step="0.01" value="1.0" class="num">
           </label>
-          <input type="range" id="j-slider" min="-2.0" max="2.0" step="0.01" value="1.0" style="width: 100%;">
+          <input type="range" id="j-slider" min="-2.0" max="2.0" step="0.01" value="1.0" class="range">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+        
+        <div class="field-col">
           <label class="label">External Field h
-            <input type="number" id="h-value" min="-2.0" max="2.0" step="0.01" value="0.0" style="width: 80px; margin-left: 8px; font-size: 1.1em;">
+            <input type="number" id="h-value" min="-2.0" max="2.0" step="0.01" value="0.0" class="num">
           </label>
-          <input type="range" id="h-slider" min="-2.0" max="2.0" step="0.01" value="0.0" style="width: 100%;">
+          <input type="range" id="h-slider" min="-2.0" max="2.0" step="0.01" value="0.0" class="range">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+        
+        <div class="field-col">
           <label class="label">Lattice Size
-            <select id="lattice-size" style="margin-left: 8px; font-size: 1.1em;">
+            <select id="lattice-size" class="select">
               <option value="8">8x8</option>
               <option value="16">16x16</option>
               <option value="32">32x32</option>
@@ -41,7 +45,8 @@
             </select>
           </label>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+        
+        <div class="field-col">
           <label class="label">Algorithm
             <select id="algorithm" style="margin-left: 8px; font-size: 1.1em;">
               <option value="metropolis" selected>Metropolis</option>
@@ -54,17 +59,19 @@
           </label>
         </div>
       </div>
-      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center; margin-bottom: 16px;">
-        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 180px;">
+      
+      <div class="controls-row">
+        <div class="field-col">
           <label class="label">Sweeps per frame</label>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="range" id="skip-slider" min="1" max="100" step="1" value="1" style="width: 100%;">
-            <input type="number" id="skip-input" min="1" max="100" step="1" value="1" style="width: 60px; margin-left: 8px; font-size: 1.1em;">
+          <div class="row" style="display: flex; align-items: center; gap: 8px;">
+            <input type="range" id="skip-slider" min="1" max="100" step="1" value="1" class="range">
+            <input type="number" id="skip-input" min="1" max="100" step="1" value="1" class="num">
           </div>
         </div>
-        <div style="display: flex; flex-direction: row; gap: 12px; align-items: center; margin-top: 8px;">
-          <button id="reset-btn" style="padding: 8px 20px; font-size: 1.1em; border-radius: 8px; margin-right: 8px;">Reset</button>
-          <button id="reset-data-btn" style="padding: 8px 20px; font-size: 1.1em; border-radius: 8px;">Reset Data</button>
+        
+        <div class="row row-buttons">
+          <button id="reset-btn" class="btn">Reset</button>
+          <button id="reset-data-btn" class="btn">Reset Data</button>
         </div>
       </div>
     </div>
@@ -72,12 +79,12 @@
     <div class="sweep-panel panel">
       <h2 class="panel-title">Sweep Controls</h2>
       <div id="sweep-controls" class="controls-row">
-        <label class="label">T<sub>init</sub>: <input type="number" id="sweep-t-init" min="0.1" max="5.0" step="0.01" value="2.5" style="width: 80px; font-size: 1.1em;"></label>
-        <label class="label">T<sub>final</sub>: <input type="number" id="sweep-t-final" min="0.1" max="5.0" step="0.01" value="1.5" style="width: 80px; font-size: 1.1em;"></label>
-        <label class="label">ΔT: <input type="number" id="sweep-t-step" min="0.01" max="1.0" step="0.01" value="-0.1" style="width: 80px; font-size: 1.1em;"></label>
-        <label class="label">Measurement sweeps: <input type="number" id="sweep-n-sweeps" min="1" max="10000" step="1" value="1000" style="width: 90px; font-size: 1.1em;"></label>
-        <label class="label">Warmup sweeps: <input type="number" id="sweep-n-warmup" min="0" max="10000" step="1" value="1000" style="width: 90px; font-size: 1.1em;"></label>
-        <label class="label">Decorrelation sweeps: <input type="number" id="sweep-n-decor" min="0" max="10000" step="1" value="5" style="width: 90px; font-size: 1.1em;"></label>
+        <label class="label">T<sub>init</sub>: <input type="number" id="sweep-t-init" min="0.1" max="5.0" step="0.01" value="2.5" class="num"></label>
+        <label class="label">T<sub>final</sub>: <input type="number" id="sweep-t-final" min="0.1" max="5.0" step="0.01" value="1.5" class="num"></label>
+        <label class="label">ΔT: <input type="number" id="sweep-t-step" min="0.01" max="1.0" step="0.01" value="-0.1" class=" num"></label>
+        <label class="label">Measurement sweeps: <input type="number" id="sweep-n-sweeps" min="1" max="10000" step="1" value="1000" class="num"></label>
+        <label class="label">Warmup sweeps: <input type="number" id="sweep-n-warmup" min="0" max="10000" step="1" value="1000" class="num"></label>
+        <label class="label">Decorrelation sweeps: <input type="number" id="sweep-n-decor" min="0" max="10000" step="1" value="5" class="num"></label>
   <button id="run-sweep-btn" class="btn">Run T Sweep</button>
   <button id="download-csv-btn" class="btn btn-muted" disabled>Download CSV</button>
       </div>
