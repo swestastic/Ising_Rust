@@ -96,8 +96,21 @@ canvas{
     margin-bottom: 8px;
   }
 
+  .link{
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:bold;
+  }
+  .link:hover{ text-decoration:underline; }
+
   .prose{
     font-size:1.1em;
+  }
+
+  .prose ul{
+    list-style:disc;
+    margin:0;
+    padding-left:20px;
   }
 
   .readout{
