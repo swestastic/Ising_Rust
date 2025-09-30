@@ -42,7 +42,7 @@ body{
     padding:16px 16px;
     margin-bottom:24px;
     box-shadow:var(--shadow);
-    border:1px solid var(--border);
+    border:2px solid var(--border);
   }
 
   .panel-title{
