@@ -96,8 +96,16 @@
     </div>
   
     <div class="stage">
-      <canvas id="canvas" class="sim-canvas"></canvas>
-      
+      <div class="sim-column">
+        <canvas id="canvas" class="sim-canvas"></canvas>
+
+        <!-- Legend showing which spin value maps to which color -->
+        <div class="legend" role="status" aria-label="Spin color legend">
+          <div class="legend-item"><span class="swatch swatch-white" aria-hidden="true"></span><span class="legend-label">+1</span></div>
+          <div class="legend-item"><span class="swatch swatch-black" aria-hidden="true"></span><span class="legend-label">−1</span></div>
+        </div>
+      </div>
+
       <div style="display: flex; flex-direction: column; align-items: center;">
         <canvas id="live-plot" width="400" height="400" class="plot-canvas"></canvas>
         

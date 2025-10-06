@@ -189,6 +189,47 @@ canvas{
     width:100%;
   }
 
+  /* Legend for spin color mapping (inline, centered under canvas) */
+  .legend{
+    display:flex;
+    flex-direction:row;
+    gap:12px;
+    margin:0;
+    justify-content:center;
+    align-items:center;
+    color:var(--text);
+    font-size:0.95em;
+    font-family:var(--sans);
+  }
+
+  /* Stack canvas and legend vertically and center the legend under the canvas */
+  .sim-column{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .swatch{
+    width:20px;
+    height:20px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    box-shadow:var(--shadow);
+    display:inline-block;
+  }
+
+  .swatch-white{ background:#fff; }
+  .swatch-black{ background:#000; }
+
+  .legend-label{ color:var(--muted); }
+
   .prose ul{
     list-style:disc;
     margin:0;
