@@ -121,6 +121,11 @@
           </label>
 
           <span class="readout">E = <span id="energy-value">0.0000</span> &nbsp; M = <span id="magnetization-value">+0.0000</span></span>
+          <div class="readout" style="display:flex; gap:12px; margin-top:6px;">
+            <span>&lt;E&gt; = <span id="avg-energy-30s">0.0000</span></span>
+            <span>&lt;M&gt; = <span id="avg-magnetization-30s">0.0000</span></span>
+          </div>
+          <span class="readout">&lt;|M|&gt; = <span id="avg-abs-magnetization-30s">0.0000</span></span>
           <span class="readout">Acceptance Ratio: <span id="acceptance-ratio">0</span></span>
           <span class="readout">Sweeps/sec: <span id="sweeps-per-sec">0</span></span>
         </div>
@@ -141,6 +146,7 @@
           The website is written in plain HTML, CSS, and JavaScript.
           </p>
           <p><a href="algorithms.html" class="link">→ Learn more about the algorithms used in this simulation</a></p>
+          <p><a href="http://www.github.com/swestastic/Ising_Rust" class="link">→ View the source code on GitHub</a></p>
           <ul>
             <li>T slider adjusts temperature of the simulation. Default value is the critical Temperature - approximately 2.269185 J/k (k=1 for this simulation)</li>
             <li>J slider adjusts the coupling constant between spins. The default value is 1.0.
@@ -172,13 +178,9 @@
         <h3>TODO List</h3>
         <ul>
           <li>Documentation/information about algorithms</li>
-          <li>Finish testing for accuracy</li>
           <li>Add |M| binned output</li>
-          <li>Improve UI/UX design</li>
-          <li>Code cleanup and comments</li>
           <li>Live readout for average cluster size</li>
           <li>Better axes and higher resolution for plots</li>
-          <li>Average energy and magnetization, &lt;E&gt; and &lt;M&gt; live readouts</li>
           <li>Update E and M based on local changes (Heat bath only, probably not worth implementing for Wolff & SW)</li>
         </ul>
       </div>

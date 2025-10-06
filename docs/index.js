@@ -11,7 +11,7 @@ let spins = null;
 let animationId;
 let algorithm = "metropolis";
 let sweepsPerFrame = 1;
-let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRatioValue, sweepsPerSecValue, livePlot, livePlotCtx;
+let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRatioValue, sweepsPerSecValue, avgEnergy30sValue, avgMagnetization30sValue, avgAbsMagnetization30sValue, livePlot, livePlotCtx;
 let plotHistory = [];
 const maxHistory = 400;
 let plotType = "energy";
@@ -26,6 +26,19 @@ let downloadCsvBtn = null;
 
 let sweepState = null;
 let sweepRunning = false;
+
+// Cache algorithm function for performance
+let algorithmFunc = null;
+
+function getAlgorithmFunc(algo) {
+    if (algo === "metropolis") return () => ising.metropolis_step();
+    if (algo === "wolff") return () => ising.wolff_step();
+    if (algo === "swendsen-wang") return () => ising.swendsen_wang_step();
+    if (algo === "heat-bath") return () => ising.heatbath_step();
+    if (algo === "glauber") return () => ising.glauber_step();
+    if (algo === "kawasaki") return () => ising.kawasaki_step();
+    return () => ising.metropolis_step();
+}
 
 async function run() {
     downloadCsvBtn = document.getElementById("download-csv-btn");
@@ -156,6 +169,9 @@ async function run() {
     magnetizationValue = document.getElementById("magnetization-value");
     acceptanceRatioValue = document.getElementById("acceptance-ratio");
     sweepsPerSecValue = document.getElementById("sweeps-per-sec");
+    avgEnergy30sValue = document.getElementById("avg-energy-30s");
+    avgMagnetization30sValue = document.getElementById("avg-magnetization-30s");
+    avgAbsMagnetization30sValue = document.getElementById("avg-abs-magnetization-30s");
     plotTypeDropdown.addEventListener("change", () => {
         plotType = plotTypeDropdown.value;
         plotHistory = [];
@@ -220,11 +236,15 @@ async function run() {
     const algorithmDropdown = document.getElementById("algorithm");
     algorithmDropdown.addEventListener("change", () => {
         algorithm = algorithmDropdown.value;
+        algorithmFunc = getAlgorithmFunc(algorithm);
         if (animationId) {
             cancelAnimationFrame(animationId);
         }
         render();
     });
+    
+    // Initialize algorithm function
+    algorithmFunc = getAlgorithmFunc(algorithm);
 
     // Sweeps per frame slider
     const skipSlider = document.getElementById("skip-slider");
@@ -260,6 +280,13 @@ async function run() {
         render.sweepCount = 0;
         sweepsHistory = [];
         timeHistory = [];
+        historyStartIndex = 0;
+        energySamples = [];
+        magnetizationSamples = [];
+        absMagnetizationSamples = [];
+        energyStartIndex = 0;
+        magnetizationStartIndex = 0;
+        absMagnetizationStartIndex = 0;
         if (animationId) {
             cancelAnimationFrame(animationId);
         }
@@ -275,6 +302,13 @@ async function run() {
         render.sweepCount = 0;
         sweepsHistory = [];
         timeHistory = [];
+        historyStartIndex = 0;
+        energySamples = [];
+        magnetizationSamples = [];
+        absMagnetizationSamples = [];
+        energyStartIndex = 0;
+        magnetizationStartIndex = 0;
+        absMagnetizationStartIndex = 0;
         if (animationId) {
             cancelAnimationFrame(animationId);
         }
@@ -303,6 +337,13 @@ let lastTime = performance.now();
 let lastSweepCount = 0;
 let sweepsHistory = [];
 let timeHistory = [];
+let historyStartIndex = 0; // Track start index instead of shifting
+let energySamples = []; // {t, e} samples for 30s rolling average
+let magnetizationSamples = []; // {t, m} samples for 30s rolling average
+let absMagnetizationSamples = []; // {t, absM} samples for 30s rolling average
+let energyStartIndex = 0;
+let magnetizationStartIndex = 0;
+let absMagnetizationStartIndex = 0;
 
 function render() {
     // No scaling needed for square aspect ratio, use default transform
@@ -335,19 +376,7 @@ function render() {
                 // Run warmup sweeps
                 let batch = Math.min(sweepState.batchSize, sweepState.nWarmup - sweepState.warmupCount);
                 for (let s = 0; s < batch; s++) {
-                    if (algorithm === "metropolis") {
-                        ising.metropolis_step();
-                    } else if (algorithm === "wolff") {
-                        ising.wolff_step();
-                    } else if (algorithm === "swendsen-wang") {
-                        ising.swendsen_wang_step();
-                    } else if (algorithm === "heat-bath") {
-                        ising.heatbath_step();
-                    } else if (algorithm === "glauber") {
-                        ising.glauber_step();
-                    } else if (algorithm === "kawasaki") {
-                        ising.kawasaki_step();
-                    }
+                    algorithmFunc();
                 }
                 sweepsThisFrame += batch;
                 sweepState.warmupCount += batch;
@@ -359,19 +388,7 @@ function render() {
                 // Run decorrelation sweeps
                 let batch = Math.min(sweepState.batchSize, sweepState.nDecor - sweepState.decorCount);
                 for (let s = 0; s < batch; s++) {
-                    if (algorithm === "metropolis") {
-                        ising.metropolis_step();
-                    } else if (algorithm === "wolff") {
-                        ising.wolff_step();
-                    } else if (algorithm === "swendsen-wang") {
-                        ising.swendsen_wang_step();
-                    } else if (algorithm === "heat-bath") {
-                        ising.heatbath_step();
-                    } else if (algorithm === "glauber") {
-                        ising.glauber_step();
-                    } else if (algorithm === "kawasaki") {
-                        ising.kawasaki_step();
-                    }
+                    algorithmFunc();
                 }
                 sweepsThisFrame += batch;
                 sweepState.decorCount += batch;
@@ -383,19 +400,7 @@ function render() {
                 // Run measurement sweeps
                 let batch = Math.min(sweepState.batchSize, sweepState.nSweeps - sweepState.sweepCount);
                 for (let s = 0; s < batch; s++) {
-                    if (algorithm === "metropolis") {
-                        ising.metropolis_step();
-                    } else if (algorithm === "wolff") {
-                        ising.wolff_step();
-                    } else if (algorithm === "swendsen-wang") {
-                        ising.swendsen_wang_step();
-                    } else if (algorithm === "heat-bath") {
-                        ising.heatbath_step();
-                    } else if (algorithm === "glauber") {
-                        ising.glauber_step();
-                    } else if (algorithm === "kawasaki") {
-                        ising.kawasaki_step();
-                    }
+                    algorithmFunc();
                     // Store measurement values for binning
                     const idx = sweepState.tIndex;
                     sweepState.binData[idx].energy.push(ising.energy);
@@ -458,19 +463,7 @@ function render() {
         }
     } else {
         for (let sweep = 0; sweep < sweepsPerFrame; sweep++) {
-            if (algorithm === "metropolis") {
-                ising.metropolis_step();
-            } else if (algorithm === "wolff") {
-                ising.wolff_step();
-            } else if (algorithm === "swendsen-wang") {
-                ising.swendsen_wang_step();
-            } else if (algorithm === "heat-bath") {
-                ising.heatbath_step();
-            } else if (algorithm === "glauber") {
-                ising.glauber_step();
-            } else if (algorithm === "kawasaki") {
-                ising.kawasaki_step();
-            }
+            algorithmFunc();
         }
         sweepsThisFrame += sweepsPerFrame;
     }
@@ -481,14 +474,42 @@ function render() {
     render.sweepCount += sweepsThisFrame;
     sweepsHistory.push(render.sweepCount);
     timeHistory.push(now);
-    // Keep only last 30 seconds of history
-    while (timeHistory.length > 0 && now - timeHistory[0] > 30000) {
-        timeHistory.shift();
-        sweepsHistory.shift();
+    // Keep only last 30 seconds of history - use index tracking instead of shift
+    while (historyStartIndex < timeHistory.length && now - timeHistory[historyStartIndex] > 30000) {
+        historyStartIndex++;
     }
-    if (timeHistory.length > 1) {
-        const dt = (timeHistory[timeHistory.length - 1] - timeHistory[0]) / 1000;
-        const dsweeps = sweepsHistory[sweepsHistory.length - 1] - sweepsHistory[0];
+    // Periodically clean up arrays when they get too large
+    if (historyStartIndex > 1000) {
+        timeHistory = timeHistory.slice(historyStartIndex);
+        sweepsHistory = sweepsHistory.slice(historyStartIndex);
+        historyStartIndex = 0;
+    }
+    // Trim energySamples and magnetizationSamples older than 30s
+    while (energyStartIndex < energySamples.length && now - energySamples[energyStartIndex].t > 30000) {
+        energyStartIndex++;
+    }
+    while (magnetizationStartIndex < magnetizationSamples.length && now - magnetizationSamples[magnetizationStartIndex].t > 30000) {
+        magnetizationStartIndex++;
+    }
+    while (absMagnetizationStartIndex < absMagnetizationSamples.length && now - absMagnetizationSamples[absMagnetizationStartIndex].t > 30000) {
+        absMagnetizationStartIndex++;
+    }
+    // Periodically clean up sample arrays
+    if (energyStartIndex > 1000) {
+        energySamples = energySamples.slice(energyStartIndex);
+        energyStartIndex = 0;
+    }
+    if (magnetizationStartIndex > 1000) {
+        magnetizationSamples = magnetizationSamples.slice(magnetizationStartIndex);
+        magnetizationStartIndex = 0;
+    }
+    if (absMagnetizationStartIndex > 1000) {
+        absMagnetizationSamples = absMagnetizationSamples.slice(absMagnetizationStartIndex);
+        absMagnetizationStartIndex = 0;
+    }
+    if (timeHistory.length - historyStartIndex > 1) {
+        const dt = (timeHistory[timeHistory.length - 1] - timeHistory[historyStartIndex]) / 1000;
+        const dsweeps = sweepsHistory[sweepsHistory.length - 1] - sweepsHistory[historyStartIndex];
         const sweepsPerSecAvg = dsweeps / dt;
         sweepsPerSecValue.textContent = sweepsPerSecAvg.toFixed(1);
     }
@@ -507,16 +528,66 @@ function render() {
     // Always calculate both <E> and <M>
     const energy = ising.energy;
     const magnetization = ising.magnetization;
+    const acceptanceRatio = ising.accepted / ising.attempted;
     energyValue.textContent = energy.toFixed(4);
     magnetizationValue.textContent = (magnetization >= 0 ? "+" : "") + magnetization.toFixed(4);
-    acceptanceRatioValue.textContent = (ising.accepted / ising.attempted).toFixed(4);
+    acceptanceRatioValue.textContent = acceptanceRatio.toFixed(4);
+    // Record timestamped energy and magnetization samples
+    energySamples.push({ t: now, e: energy });
+    magnetizationSamples.push({ t: now, m: magnetization });
+    absMagnetizationSamples.push({ t: now, absM: Math.abs(magnetization) });
+    // Compute rolling average over energySamples (only valid samples)
+    if (energySamples.length - energyStartIndex > 0) {
+        let sum = 0;
+        let count = 0;
+        for (let i = energyStartIndex; i < energySamples.length; i++) {
+            const v = energySamples[i].e;
+            if (!Number.isFinite(v)) continue;
+            sum += v;
+            count++;
+        }
+        if (count > 0 && avgEnergy30sValue) {
+            const avg = sum / count;
+            avgEnergy30sValue.textContent = avg.toFixed(4);
+        }
+    }
+    // Compute rolling average over magnetizationSamples (only valid samples)
+    if (magnetizationSamples.length - magnetizationStartIndex > 0 && avgMagnetization30sValue) {
+        let sumM = 0;
+        let countM = 0;
+        for (let i = magnetizationStartIndex; i < magnetizationSamples.length; i++) {
+            const v = magnetizationSamples[i].m;
+            if (!Number.isFinite(v)) continue;
+            sumM += v;
+            countM++;
+        }
+        if (countM > 0) {
+            const avgM = sumM / countM;
+            avgMagnetization30sValue.textContent = avgM.toFixed(4);
+        }
+    }
+    // Compute rolling average over absMagnetizationSamples (only valid samples)
+    if (absMagnetizationSamples.length - absMagnetizationStartIndex > 0 && avgAbsMagnetization30sValue) {
+        let sumAbsM = 0;
+        let countAbsM = 0;
+        for (let i = absMagnetizationStartIndex; i < absMagnetizationSamples.length; i++) {
+            const v = absMagnetizationSamples[i].absM;
+            if (!Number.isFinite(v)) continue;
+            sumAbsM += v;
+            countAbsM++;
+        }
+        if (countAbsM > 0) {
+            const avgAbsM = sumAbsM / countAbsM;
+            avgAbsMagnetization30sValue.textContent = avgAbsM.toFixed(4);
+        }
+    }
     let value;
     if (plotType === "energy") {
         value = energy;
     } else if (plotType === "magnetization") {
         value = magnetization;
     } else if (plotType === "acceptance_ratio") {
-        value = (ising.accepted / ising.attempted);
+        value = acceptanceRatio;
     } else {
         value = 0;
     }
