@@ -588,6 +588,8 @@ function render() {
         value = magnetization;
     } else if (plotType === "acceptance_ratio") {
         value = acceptanceRatio;
+    } else if (plotType === "abs_magnetization") {
+        value = Math.abs(magnetization);
     } else {
         value = 0;
     }
@@ -641,6 +643,8 @@ function render() {
             livePlotCtx.fillText("Acceptance Ratio", 0, 0);
         } else if (plotType === "magnetization") {
             livePlotCtx.fillText("Magnetization", 0, 0);
+        } else if (plotType === "abs_magnetization") {
+            livePlotCtx.fillText("Absolute Magnetization", 0, 0);
         } else if (plotType === "energy") {
             livePlotCtx.fillText("Energy", 0, 0);
         }
