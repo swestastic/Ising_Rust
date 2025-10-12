@@ -15,6 +15,8 @@ let plotLabel, plotTypeDropdown, energyValue, magnetizationValue, acceptanceRati
 let plotHistory = [];
 const maxHistory = 400;
 let plotType = "energy";
+// Modal canvas references
+let canvasModal, modalCanvas, modalCtx, expandedCanvasType = null;
 // Top-level references for temperature controls
 let tempSlider = null;
 let runSweepBtn = null;
@@ -270,6 +272,70 @@ async function run() {
     });
     skipInput.value = sweepsPerFrame;
 
+    // Modal functionality for canvas expansion
+    canvasModal = document.getElementById("canvas-modal");
+    modalCanvas = document.getElementById("modal-canvas");
+    modalCtx = modalCanvas.getContext("2d");
+    const modalClose = canvasModal.querySelector(".modal-close");
+
+    function openModal(canvasType) {
+        expandedCanvasType = canvasType;
+        canvasModal.classList.add("active");
+        
+        // Set modal canvas size to be larger (80% of viewport)
+        const maxSize = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.8);
+        
+        if (canvasType === "sim") {
+            // For simulation canvas, match the aspect ratio of the lattice
+            modalCanvas.width = n;
+            modalCanvas.height = n;
+            modalCanvas.style.width = maxSize + "px";
+            modalCanvas.style.height = maxSize + "px";
+            modalCanvas.style.imageRendering = "pixelated";
+            
+            // Copy current simulation state
+            if (spins) {
+                const modalImageData = modalCtx.createImageData(n, n);
+                const data32 = new Uint32Array(modalImageData.data.buffer);
+                for (let i = 0; i < n * n; i++) {
+                    data32[i] = spins[i] === 1 ? 0xFFFFFFFF : 0xFF000000;
+                }
+                modalCtx.putImageData(modalImageData, 0, 0);
+            }
+        } else if (canvasType === "plot") {
+            // For plot canvas, use a larger resolution
+            modalCanvas.width = 800;
+            modalCanvas.height = 800;
+            modalCanvas.style.width = maxSize + "px";
+            modalCanvas.style.height = maxSize + "px";
+            modalCanvas.style.imageRendering = "auto";
+            
+            // Redraw the plot at higher resolution
+            drawPlotToCanvas(modalCtx, modalCanvas.width, modalCanvas.height);
+        }
+    }
+
+    function closeModal() {
+        canvasModal.classList.remove("active");
+        expandedCanvasType = null;
+    }
+
+    // Click handlers for canvases
+    canvas.addEventListener("click", () => openModal("sim"));
+    livePlot.addEventListener("click", () => openModal("plot"));
+    
+    // Close modal on click
+    canvasModal.addEventListener("click", closeModal);
+    modalClose.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeModal();
+    });
+    
+    // Prevent closing when clicking on the canvas itself
+    modalCanvas.addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
+
     // Reset button logic
     const resetBtn = document.getElementById("reset-btn");
     resetBtn.addEventListener("click", () => {
@@ -344,6 +410,96 @@ let absMagnetizationSamples = []; // {t, absM} samples for 30s rolling average
 let energyStartIndex = 0;
 let magnetizationStartIndex = 0;
 let absMagnetizationStartIndex = 0;
+
+// Helper function to draw plot to any canvas context
+function drawPlotToCanvas(ctx, width, height) {
+    if (plotType === "no_plot" || plotHistory.length === 0) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Calculate margins based on canvas size
+    const leftMargin = width * 0.1;
+    const rightMargin = width * 0.025;
+    const topMargin = height * 0.05;
+    const bottomMargin = height * 0.05;
+    
+    // Axes
+    ctx.strokeStyle = "#aaa";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // Y axis
+    ctx.moveTo(leftMargin, topMargin);
+    ctx.lineTo(leftMargin, height - bottomMargin);
+    // X axis
+    ctx.moveTo(leftMargin, height - bottomMargin);
+    ctx.lineTo(width - rightMargin, height - bottomMargin);
+    ctx.stroke();
+    
+    // Y labels
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "#fff";
+    ctx.font = `${Math.floor(height * 0.02)}px Arial`;
+    ctx.textAlign = "right";
+    let yMin, yMax;
+    if (plotType === "energy") {
+        yMin = -2 * Math.abs(j) - Math.abs(h);
+        yMax = 2 * Math.abs(j) + Math.abs(h);
+        ctx.fillText(yMin.toFixed(2), leftMargin - 5, height - bottomMargin);
+        ctx.fillText("0", leftMargin - 5, height / 2);
+        ctx.fillText(yMax.toFixed(2), leftMargin - 5, topMargin);
+    } else {
+        yMin = -1;
+        yMax = 1;
+        ctx.fillText("-1", leftMargin - 5, height - bottomMargin);
+        ctx.fillText("0", leftMargin - 5, height / 2);
+        ctx.fillText("1", leftMargin - 5, topMargin);
+    }
+    
+    // X label
+    ctx.textAlign = "center";
+    ctx.font = `${Math.floor(height * 0.025)}px Arial`;
+    ctx.fillText("Frame", width / 2, height - 5);
+    
+    // Y axis label
+    ctx.save();
+    ctx.translate(15, height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.font = `${Math.floor(height * 0.025)}px Arial`;
+    if (plotType === "acceptance_ratio") {
+        ctx.fillText("Acceptance Ratio", 0, 0);
+    } else if (plotType === "magnetization") {
+        ctx.fillText("Magnetization", 0, 0);
+    } else if (plotType === "abs_magnetization") {
+        ctx.fillText("Absolute Magnetization", 0, 0);
+    } else if (plotType === "energy") {
+        ctx.fillText("Energy", 0, 0);
+    }
+    ctx.restore();
+    ctx.restore();
+    
+    // Plot line
+    ctx.beginPath();
+    ctx.strokeStyle = "#00ff00";
+    ctx.lineWidth = 3;
+    const plotLeft = leftMargin;
+    const plotRight = width - rightMargin;
+    const plotTop = topMargin;
+    const plotBottom = height - bottomMargin;
+    
+    for (let i = 0; i < plotHistory.length; i++) {
+        const x = plotLeft + ((plotRight - plotLeft) * i) / maxHistory;
+        let y = plotBottom - ((plotHistory[i] - yMin) / (yMax - yMin)) * (plotBottom - plotTop);
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.stroke();
+}
 
 function render() {
     // No scaling needed for square aspect ratio, use default transform
@@ -598,84 +754,25 @@ function render() {
         plotHistory.push(value);
         if (plotHistory.length > maxHistory) plotHistory.shift();
 
-        // Draw plot with axes and labels
-        livePlotCtx.clearRect(0, 0, livePlot.width, livePlot.height);
-        // Axes
-        livePlotCtx.strokeStyle = "#aaa";
-        livePlotCtx.lineWidth = 1;
-        livePlotCtx.beginPath();
-        // Y axis
-        livePlotCtx.moveTo(40, 10);
-        livePlotCtx.lineTo(40, livePlot.height - 20);
-        // X axis
-        livePlotCtx.moveTo(40, livePlot.height - 20);
-        livePlotCtx.lineTo(livePlot.width - 10, livePlot.height - 20);
-        livePlotCtx.stroke();
-
-        // Y labels
-        livePlotCtx.save();
-        livePlotCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
-        livePlotCtx.fillStyle = "#fff";
-        livePlotCtx.font = "12px Arial";
-        livePlotCtx.textAlign = "right";
-        if (plotType === "energy") {
-            const ymin = -2 * Math.abs(j) - Math.abs(h);
-            const ymax = 2 * Math.abs(j) + Math.abs(h);
-            livePlotCtx.fillText(ymin.toFixed(2), 35, livePlot.height - 20);
-            livePlotCtx.fillText("0", 35, livePlot.height / 2 + 5);
-            livePlotCtx.fillText(ymax.toFixed(2), 35, 20);
-        } else {
-            livePlotCtx.fillText("-1", 35, livePlot.height - 20);
-            livePlotCtx.fillText("0", 35, livePlot.height / 2 + 5);
-            livePlotCtx.fillText("1", 35, 20);
+        // Draw plot using helper function
+        drawPlotToCanvas(livePlotCtx, livePlot.width, livePlot.height);
+        
+        // Update modal if it's showing the plot
+        if (expandedCanvasType === "plot") {
+            drawPlotToCanvas(modalCtx, modalCanvas.width, modalCanvas.height);
         }
-        // X label
-        livePlotCtx.textAlign = "center";
-        livePlotCtx.font = "14px Arial";
-        livePlotCtx.fillText("Frame", livePlot.width / 2, livePlot.height - 2);
-        // Y axis label
-        livePlotCtx.save();
-        livePlotCtx.translate(10, livePlot.height / 2);
-        livePlotCtx.rotate(-Math.PI / 2);
-        livePlotCtx.textAlign = "center";
-        livePlotCtx.font = "14px Arial";
-        if (plotType === "acceptance_ratio") {
-            livePlotCtx.fillText("Acceptance Ratio", 0, 0);
-        } else if (plotType === "magnetization") {
-            livePlotCtx.fillText("Magnetization", 0, 0);
-        } else if (plotType === "abs_magnetization") {
-            livePlotCtx.fillText("Absolute Magnetization", 0, 0);
-        } else if (plotType === "energy") {
-            livePlotCtx.fillText("Energy", 0, 0);
-        }
-        livePlotCtx.restore();
-
-        // Plot line
-        livePlotCtx.beginPath();
-        livePlotCtx.strokeStyle = "#00ff00";
-        livePlotCtx.lineWidth = 2;
-        let yMin, yMax;
-        if (plotType === "energy") {
-            yMin = -2 * Math.abs(j) - Math.abs(h);
-            yMax = 2 * Math.abs(j) + Math.abs(h);
-        } else {
-            yMin = -1;
-            yMax = 1;
-        }
-        // Map y values so that yMin maps to (livePlot.height - 20) and yMax maps to 20
-        const plotTop = 20;
-        const plotBottom = livePlot.height - 20;
-        for (let i = 0; i < plotHistory.length; i++) {
-            const x = 40 + ((livePlot.width - 50) * i) / maxHistory;
-            let y = plotBottom - ((plotHistory[i] - yMin) / (yMax - yMin)) * (plotBottom - plotTop);
-            if (i === 0) {
-                livePlotCtx.moveTo(x, y);
-            } else {
-                livePlotCtx.lineTo(x, y);
-            }
-        }
-        livePlotCtx.stroke();
     }
+    
+    // Update modal if it's showing the simulation
+    if (expandedCanvasType === "sim" && spins) {
+        const modalImageData = modalCtx.createImageData(n, n);
+        const data32 = new Uint32Array(modalImageData.data.buffer);
+        for (let i = 0; i < n * n; i++) {
+            data32[i] = spins[i] === 1 ? 0xFFFFFFFF : 0xFF000000;
+        }
+        modalCtx.putImageData(modalImageData, 0, 0);
+    }
+    
     // Always continue animation
     animationId = requestAnimationFrame(render);
 }
